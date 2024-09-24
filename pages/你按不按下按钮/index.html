@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你按不按下按钮</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>你按不按下按钮？</h1>
+        <button id="random-button">随机一个！</button>
+        
+        <!-- 显示超能力和选择按钮的区域 -->
+        <div id="result" class="result" style="display: none;">
+            <h2 id="superpower"></h2>
+            <p id="sideeffect"></p>
+            <img id="power-image" src="" alt="超能力图片" style="display: none;">
+            
+            <!-- 交互选择按钮 -->
+            <div class="choice-buttons">
+                <button id="accept-button" class="action-button">按！</button>
+                <button id="decline-button" class="action-button">不按</button>
+            </div>
+        </div>
+        
+        <!-- 用户选择结果 -->
+        <div id="user-choice" class="user-choice" style="display: none;">
+            <p id="choice-result"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+/* 全局样式 */
+body {
+    font-family: 'Helvetica', Arial, sans-serif;
+    background-color: #f2ede8; /* 莫兰迪背景色 */
+    color: #444;
+    text-align: center;
+    padding: 50px;
+    margin: 0;
+}
+
+/* 容器样式 */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 15px;
+    background-color: #e0d3cc; /* 莫兰迪容器色 */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 标题样式 */
+h1 {
+    color: #5a4c43; /* 深莫兰迪色 */
+    font-size: 28px;
+}
+
+/* 按钮样式 */
+button {
+    padding: 12px 24px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    background-color: #9a8f8a; /* 莫兰迪色 */
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 10px;
+}
+
+button:hover {
+    background-color: #746963; /* 更深的莫兰迪色 */
+}
+
+/* 结果区域 */
+.result {
+    margin-top: 30px;
+    text-align: center;
+}
+
+#superpower {
+    font-size: 24px;
+    margin: 10px 0;
+    color: #6c645f; /* 深莫兰迪色 */
+}
+
+#sideeffect {
+    font-size: 18px;
+    color: #756d68; /* 浅莫兰迪色 */
+}
+
+/* 居中显示图片 */
+#power-image {
+    max-width: 80%;
+    height: auto;
+    margin: 20px auto;
+    display: block;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 交互按钮样式 */
+.choice-buttons {
+    margin-top: 20px;
+}
+
+.action-button {
+    background-color: #a79793; /* 按钮莫兰迪色 */
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 16px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.action-button:hover {
+    background-color: #867571; /* 深色变体 */
+}
+
+/* 用户选择的结果 */
+.user-choice {
+    margin-top: 30px;
+}
+
+#choice-result {
+    font-size: 22px;
+    color: #5a4c43;
+}

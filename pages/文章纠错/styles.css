@@ -1,0 +1,80 @@
+/* 全局样式 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2ede8; /* 莫兰迪背景色 */
+    color: #444;
+    text-align: center;
+    padding: 50px;
+    margin: 0;
+}
+
+/* 容器样式 */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 15px;
+    background-color: #e0d3cc; /* 莫兰迪容器色 */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 标题样式 */
+h1 {
+    color: #5a4c43; /* 深莫兰迪色 */
+    font-size: 28px;
+}
+
+/* 文本输入框样式 */
+textarea {
+    width: 100%; /* 确保输入框宽度不会超出父容器 */
+    box-sizing: border-box; /* 包含内边距和边框在内的宽度 */
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    border: 1px solid #b5a2b3;
+    resize: none;
+    transition: border-color 0.3s;
+}
+
+textarea:focus {
+    border-color: #7a5c8d; /* 深莫兰迪色 */
+}
+
+/* 按钮样式 */
+button {
+    padding: 12px 24px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    background-color: #9a8f8a; /* 按钮莫兰迪色 */
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #746963; /* 更深的莫兰迪色 */
+}
+
+/* 结果显示区域 */
+.result-box {
+    margin-top: 30px;
+    padding: 15px;
+    background-color: #f7f3f0;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+/* 纠正项目样式 */
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+ul li {
+    margin: 5px 0;
+    font-size: 16px;
+    color: #333;
+}

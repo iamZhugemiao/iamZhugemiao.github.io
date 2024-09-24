@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>脑筋急转弯</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>脑筋急转弯</h1>
+        
+        <!-- 获取问题按钮 -->
+        <button id="get-question-button">获取一个！</button>
+
+        <!-- 显示问题 -->
+        <div id="question-box" class="question-box">
+            <p id="question-text">点击上方按钮获取一个脑筋急转弯！</p>
+        </div>
+
+        <!-- 查看答案按钮，初始隐藏 -->
+        <button id="show-answer-button" style="display: none;">查看答案！</button>
+
+        <!-- 显示答案区域 -->
+        <div id="answer-box" class="answer-box" style="display: none;">
+            <p id="answer-text"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>艺术二维码生成器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>艺术二维码生成器</h1>
+        
+        <!-- 输入主题和链接 -->
+        <div class="input-group">
+            <input type="text" id="prompt-input" placeholder="输入二维码主题">
+            <input type="text" id="url-input" placeholder="输入链接">
+            <button id="generate-button">生成二维码</button>
+        </div>
+
+        <!-- 展示生成的二维码 -->
+        <div id="result" class="result" style="display: none;">
+            <h2>生成的二维码：</h2>
+            <img id="qrcode-image" src="" alt="艺术二维码">
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
