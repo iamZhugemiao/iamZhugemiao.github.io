@@ -1,0 +1,468 @@
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('Assests/background.jpg');
+    background-size: cover;
+    background-position: center;
+    z-index: -1; /* 确保背景图在内容后面 */
+    background-blend-mode: darken;
+    background-color: rgba(0, 0, 0, 0.5); /* 叠加一个半透明的黑色层 */
+}
+
+.main-container {
+    display: flex;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    max-width: 80%;
+    margin: 20px;
+}
+
+.left-section, .center-section, .new-right-section {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.left-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.center-section {
+    flex: 2;
+    margin: 0 20px;
+}
+
+.new-right-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.right-section {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.intro {
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.2); /* 半透明背景，仅自我介绍区域 */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.intro h1 {
+    margin: 0;
+    font-size: 2em;
+    color: #ffffff; /* 保证自我介绍标题可见 */
+}
+
+.intro p {
+    margin-top: 10px;
+    font-size: 1.2em;
+    color: #ffffff; /* 保证自我介绍内容可见 */
+}
+
+#starry-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: "XinSong", sans-serif;
+    overflow: hidden;
+    position: relative;
+    color: #ffffff;
+}
+
+.vh-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.vh-bg {
+    position: absolute; /* canvas 背景保持在页面后面 */
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main-container {
+    display: flex;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    max-width: 80%;
+    margin: 20px;
+}
+
+.left-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 5px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.right-section {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.intro {
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.intro h1 {
+    margin: 0;
+    font-size: 2em;
+}
+
+.intro p {
+    margin-top: 10px;
+    font-size: 1.2em;
+}
+
+.links {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.links a {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 10px 15px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.links a:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.sentence {
+    font-size: 1.5em; /* 句子字体大小 */
+    color: #333; /* 句子颜色 */
+    margin-top: 20px; /* 上边距 */
+    text-align: center; /* 居中显示 */
+    font-family: "XinSong", sans-serif;
+}
+
+@font-face {
+    font-family: "title";
+    src: url(Assests/Fonts/Pacifico-Regular.ttf);
+    font-display: swap;
+}
+
+@keyframes backgroundSizeAnimation {
+    0% {
+        background-position: 100%;
+    }
+    25% {
+        background-position: 50%;
+    }
+    50% {
+        background-position: 0%;
+    }
+    75% {
+        background-position: 50%;
+    }
+    100% {
+        background-position: 100%;
+    }
+}
+
+.gradientText {
+    background-size: 200%;
+    background-position: 0%;
+    font-family: "title";
+    animation: backgroundSizeAnimation 10s ease-in-out infinite;
+    background-image: linear-gradient(120deg, rgb(133, 62, 255), #f76cc6 30%, rgb(255, 255, 255) 60%);
+    
+    /* 关键属性 */
+    background-clip: text; /* 将背景图像裁剪到文字区域 */
+    -webkit-background-clip: text; /* 适用于 WebKit 浏览器 */
+    
+    -webkit-text-fill-color: transparent; /* 确保文字透明，以便背景可见 */
+
+    font-size: 55px;
+}
+
+.welcome {
+    font-size: 30px;
+    font-weight: 800;
+    margin: 20px 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+#daily-sentence {
+    font-family: "YiDianMingTi";
+    opacity: 0;
+    animation: fadeIn 3s forwards;
+}
+
+.styled-btn {
+    font-family: "XinSong", sans-serif;
+    background-color: rgba(255, 255, 255, 0.1); /* 透明效果 */
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5); /* 半透明边框 */
+    border-radius: 50px; /* 圆角 */
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease; /* 过渡效果 */
+}
+
+.styled-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* 悬停时稍微增加透明度 */
+    border-color: rgba(255, 255, 255, 0.8); /* 悬停时边框变亮 */
+}
+
+.styled-btn:active {
+    transform: scale(0.98); /* 点击时稍微缩小按钮 */
+}
+
+@font-face {
+    font-family: "Numbers";
+    src: url(Assests/Fonts/Futura.otf);
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Alimama";
+    src: url(Assests/Fonts/AlimamaAgileVF-Thin.ttf);
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "YiDianMIngTi";
+    src: url(Assests/Fonts/I.MingCP-8.10.ttf);
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "XinSong";
+    src: url(Assests/Fonts/SIMSUN.TTC);
+    font-display: swap;
+}
+
+#time-greeting {
+    position: relative; /* 确保相对定位 */
+    text-align: center;
+    margin-top: 20px;
+    font-family: "Numbers", sans-serif;
+    z-index: 10; /* 提高层级，防止被覆盖 */
+}
+
+#current-time {
+    font-size: 36px;
+    color: #fff; /* 白色字体，确保对比清晰 */
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* 添加阴影，使文字更清晰 */
+}
+
+#greeting {
+    font-family: "XinSong", sans-serif;
+    font-size: 24px;
+    color: #fffa; /* 半透明白色 */
+    margin-top: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+canvas.vh-bg {
+    z-index: -1; /* 将 canvas 放到后面，防止覆盖 */
+}
+
+.styled-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.styled-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.styled-btn:active {
+    transform: scale(0.98);
+}
+
+.music-player {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.play-pause-btn {
+    font-family: "XinSong", sans-serif;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    width: 120px;
+}
+
+.play-pause-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.play-pause-btn:active {
+    transform: scale(0.98);
+}
+
+.volume-control {
+    position: relative;
+    display: inline-block;
+    margin-left: 10px;
+    vertical-align: middle; /* 与按钮对齐 */
+}
+
+.volume-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.volume-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.volume-slider {
+    position: absolute;
+    top: 50%; /* 将音量条与按钮对齐 */
+    left: 100%;
+    transform: translateY(-50%) scaleX(0); /* 初始隐藏状态 */
+    transform-origin: left;
+    transition: transform 0.3s ease; /* 展开动画效果 */
+    width: 120px;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+}
+
+.volume-control:hover .volume-slider {
+    transform: translateY(-50%) scaleX(1); /* 悬停时展开 */
+}
+
+.weather-container {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.2); /* 半透明背景 */
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.weather-container h3 {
+    margin-bottom: 10px;
+    font-size: 1.5em;
+    color: #fff;
+}
+
+#weather-info p {
+    font-size: 1.2em;
+    color: #fff;
+}
+
+.weather-detail {
+    font-size: 1em;
+    margin-top: 10px;
+}

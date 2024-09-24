@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人主页</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <canvas class="vh-bg"></canvas>
+    
+    <div class="content">
+        <div class="main-container">
+            <div class="left-section">
+                <img src="Assests/头像.png" alt="头像" class="avatar">
+            </div>
+            <div class="center-section">
+                <div class="intro">
+                    <div class="welcome">你好, 我是 <span class="gradientText">Sharon</span></div>
+                    <div class="intro">
+                        <p id="daily-sentence">每日一言</p>
+                    </div>
+                    <div id="time-greeting">
+                        <div id="current-time"></div>
+                        <div id="greeting"></div>
+                    </div>
+                </div>
+
+                <div class="music-player">
+                    <audio id="audio-player" src="Assests/【改编版】His theme.mp3"></audio>
+                    <button id="play-pause" class="play-pause-btn">播放</button>
+                    
+                    <div class="volume-control">
+                        <button id="volume-btn" class="volume-btn">🔊</button>
+                        <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="1" class="volume-slider">
+                    </div>
+                </div>                
+
+                <div class="links">
+                    <a href="https://space.bilibili.com/85363357" target="_blank" class="styled-btn">Bilibili</a>
+                    <a href="tools.html" target="_blank" class="styled-btn">工具站</a>
+                </div>
+            </div>
+            <div class="new-right-section">
+                <div id="today-weather" class="weather-container">
+                    <h3>今日天气</h3>
+                    <div id="weather-info">
+                        <p>加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function updateTimeAndGreeting() {
+            const timeElement = document.getElementById('current-time');
+            const greetingElement = document.getElementById('greeting');
+
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+
+            timeElement.textContent = `${hours}:${minutes}:${seconds}`;
+
+            let greeting = '';
+            if (hours >= 6 && hours < 12) {
+                greeting = "*这是新的一天，你充满了希望";
+            } else if (hours >= 12 && hours < 18) {
+                greeting = "*过了一个上午了，你充满了信心";
+            } else if (hours >= 18 && hours < 24) {
+                greeting = "*现在是晚上了，你充满了快乐";
+            } else {
+                greeting = "*现在是深夜了，我的朋友，恭喜你度过了一天";
+            }
+
+            greetingElement.textContent = greeting;
+        }
+
+        const beautifulSentences = [
+            "每个人，都是一颗明亮的星星，点缀这漫长的夜，浩瀚星空。",
+            "朝阳初升，万物复苏，世界在这一刻重新焕发活力。",
+            "一轮明月悬挂，照亮了大地，时间的守望者。",
+            "晨曦的第一缕阳光，透过树梢，撒下金色的光辉。",
+            "星星点点，如同无数的眼睛，默默注视着我们的人生。",
+            "夜空中的流星，划破宁静，带来美好的愿望。",
+            "远处的山峦，笼罩在晨雾中，仿佛仙境。",
+            "每当星空璀璨，思绪便飞向遥远的宇宙。",
+            "清晨的露珠，闪烁着微弱的光芒，是星星在草地上跳舞。",
+            "傍晚的晚霞，燃烧着天际，是一幅无尽的画卷。",
+            "在寂静的夜晚，星空带来无尽的思考与灵感。",
+            "月光下的湖面，如同镜子般平静，映照出无数的梦想。",
+            "当云彩飘过，阳光洒下，整个世界都变得温暖而明亮。",
+            "星空是心灵的港湾，让我在繁忙中找到片刻的宁静。",
+            "晨曦中的花朵，透着清新的气息，诉说着春天的故事。",
+            "在星空之下，感受到渺小与伟大共存的平衡。",
+            "夕阳西下，金色的余晖洒满大地，仿佛时间静止。",
+            "云海的起伏，像是时间的流动，柔和而不失力量。",
+            "夜晚的星空，让人感受到宇宙的浩瀚与神秘。",
+            "每一颗星星，都是一个美好的愿望，等待实现。",
+            "在宁静的夜晚，心灵得以安静，思绪随星星游离。",
+            "朝阳如火，驱散了黑夜的阴霾，迎来了崭新的一天。",
+            "云海之上，天际线与大地融为一体，仿佛无尽。",
+            "月光透过树叶，洒下斑驳的光影，带来梦幻的氛围。",
+            "星空如海，闪烁的星星宛如波涛拍岸，动人心弦。",
+            "晨雾弥漫，把整个世界都笼罩在梦中。",
+            "在星空的陪伴下，灵魂自由飞翔。",
+            "云朵变化万千，如同心情的波动，千姿百态。",
+            "当星辰闪烁，我的梦想也在闪耀。",
+            "静谧的夜晚，星空如诗，诉说着古老的传说。",
+            "朝阳照耀，万物复苏，生命在这一刻重新开始。",
+            "云海缥缈，仿佛在天空中舞动，轻盈而自由。",
+            "星星是一盏盏灯火，指引我前行的方向。",
+            "在星空下，我的心灵得到升华，仿佛与宇宙对话。",
+            "清晨的阳光透过窗帘，温暖了整个房间。",
+            "云朵像是天上的画笔，描绘着美丽的风景。",
+            "夜晚的星空，宛如一幅无声的画，令人陶醉。",
+            "每当我仰望星空，心中总会涌起无尽的感慨。",
+            "云海上的日出，仿佛是在向我展示人生的希望。",
+            "星空浩瀚，带着梦想与希望，照耀着我的人生道路。",
+            "当云彩在天空中飘动，我的思绪也随之飞扬。",
+            "月光如水，浸润着大地，温柔而静谧。",
+            "晨曦中的山脉，透着神秘与古老的力量。",
+            "在星空的怀抱中，心灵得以释然，梦想再次启航。",
+            "每一颗星星，都是时间的记忆，闪烁着往昔的故事。",
+            "云海之下，万物皆静，只有心跳声回荡在耳边。",
+            "在这片星空下，愿我的梦能飞得更远。",
+            "烟花绽放一瞬间，与君天涯共此时。",
+            "爱也许是我们无法理解的一种力量，但是它一直在。",
+            "It matters not what someone is born,but what they grow to be. ——Dumbledore",
+            "It is our choices,that show what we really are,far more than our abilities. ——Dumbledore",
+            "After all this Time?Always.",
+            "勇敢并不是一个人手中拿着枪，而是在你动手之前你已经知道自己会输，但依然会动手，而且无论如何会坚持到底。",
+            "Happiness can be found, even in the darkest of times, if one only remembers to turn on the light."
+        ];
+
+        window.onload = function() {
+            const randomSentence = beautifulSentences[Math.floor(Math.random() * beautifulSentences.length)];
+            const dailySentenceElement = document.getElementById('daily-sentence');
+            dailySentenceElement.textContent = randomSentence;
+
+            updateTimeAndGreeting();
+            setInterval(updateTimeAndGreeting, 1000);
+
+            const audioPlayer = document.getElementById('audio-player');
+            const playPauseBtn = document.getElementById('play-pause');
+            const volumeSlider = document.getElementById('volume-slider');
+
+            playPauseBtn.addEventListener('click', function() {
+                if (audioPlayer.paused) {
+                    audioPlayer.play();
+                    playPauseBtn.textContent = '暂停';
+                } else {
+                    audioPlayer.pause();
+                    playPauseBtn.textContent = '播放';
+                }
+            });
+
+            volumeSlider.addEventListener('input', function() {
+                audioPlayer.volume = volumeSlider.value;
+            });
+
+            async function fetchUserInfo() {
+                try {
+                    const userInfoResponse = await fetch('https://api.vvhan.com/api/visitor.info');
+                    const userInfo = await userInfoResponse.json();
+                    
+                    if (userInfo.success) {
+                        fetchWeather(userInfo.ip);
+                    } else {
+                        document.getElementById('weather-info').innerHTML = '<p>获取用户信息失败</p>';
+                    }
+                } catch (error) {
+                    console.error('获取用户信息时出错:', error);
+                    document.getElementById('weather-info').innerHTML = '<p>获取用户信息失败</p>';
+                }
+            }
+
+            async function fetchWeather(ip) {
+                try {
+                    const weatherResponse = await fetch(`https://api.vvhan.com/api/weather?ip=${ip}`);
+                    const weatherData = await weatherResponse.json();
+
+                    if (weatherData.success) {
+                        displayWeather(weatherData);
+                    } else {
+                        document.getElementById('weather-info').innerHTML = '<p>获取天气信息失败</p>';
+                    }
+                } catch (error) {
+                    console.error('获取天气信息时出错:', error);
+                    document.getElementById('weather-info').innerHTML = '<p>获取天气信息失败</p>';
+                }
+            }
+
+            function displayWeather(weatherData) {
+                const weatherInfo = document.getElementById('weather-info');
+                const data = weatherData.data;
+                const air = weatherData.air;
+
+                weatherInfo.innerHTML = `
+                    <p><strong>天气：</strong> ${data.type}</p>
+                    <p><strong>温度：</strong> ${data.low} ~ ${data.high}</p>
+                    <p><strong>风向：</strong> ${data.fengxiang} (${data.fengli})</p>
+                    <p class="weather-detail"><strong>夜间天气：</strong> ${data.night.type}, ${data.night.fengxiang} (${data.night.fengli})</p>
+                `;
+            }
+
+            fetchUserInfo();
+        };
+    </script>
+</body>
+</html>
