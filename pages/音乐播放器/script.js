@@ -16,7 +16,8 @@ class MusicPlayer {
         this.apiEndpoints = {
             netease: 'https://api.xingzhige.com/API/NetEase_CloudMusic_new/',
             kugou: 'https://api.xingzhige.com/API/Kugou_GN_new/',
-            migu: 'https://api.xingzhige.com/API/Kuwo_BD_new/'
+            migu: 'https://api.xingzhige.com/API/Kuwo_BD_new/',
+            qqmusic: 'https://api.treason.cn/API/v1/QQ-VIP/?msg=',
         };
 
         // 初始化DOM元素引用
@@ -192,22 +193,22 @@ class MusicPlayer {
         const lines = lyricsText.split('\n');
         const lyrics = [];
         const timeRegex = /\[(\d{2}):(\d{2})\.(\d{2,3})\]/;
-
+ 
         lines.forEach(line => {
             // 跳过元数据行
-            if (line.startsWith('[ti:') || line.startsWith('[ar:') || 
+            if (line.startsWith('[ti:') || line.startsWith('[ar:') ||
                 line.startsWith('[al:') || line.startsWith('[by:')) {
                 return;
             }
-
+ 
             const match = timeRegex.exec(line);
             if (match) {
                 const minutes = parseInt(match[1]);
                 const seconds = parseInt(match[2]);
                 const milliseconds = parseInt(match[3]);
                 // 统一转换为秒
-                const timeInSeconds = minutes * 60 + seconds + (milliseconds / (match[3].length === 2 ? 100 : 1000));
-                
+                const timeInSeconds = minutes * 60 + seconds + (milliseconds / (match[3].length === 2? 100 : 1000));
+ 
                 // 提取歌词文本，去除时间标记和空白
                 const text = line.substring(line.indexOf(']') + 1).trim();
                 if (text) {
@@ -218,7 +219,7 @@ class MusicPlayer {
                 }
             }
         });
-
+ 
         return lyrics.sort((a, b) => a.time - b.time);
     }
 
@@ -292,23 +293,50 @@ class MusicPlayer {
     async searchSongs() {
         const keyword = this.searchInput.value.trim();
         if (!keyword) return;
-    
+
         // 保存搜索关键词
         this.state.lastSearchKeyword = keyword;
-    
+
         try {
             this.showLoading();
-            const response = await fetch(`${this.apiEndpoints[this.state.platform]}?name=${encodeURIComponent(keyword)}&pagesize=100&br=2&n=`);
-            const data = await response.json();
-    
-            if (data.code === 0 && data.data.length > 0) {
-                this.state.currentPlaylist = data.data;
-                this.renderSongList();
-    
-                // 存储搜索列表数据
-                this.state.searchListData = data.data;
+            const platform = this.state.platform;
+            let response;
+            if (platform === 'qqmusic') {
+                response = await fetch(`${this.apiEndpoints[platform]}${encodeURIComponent(keyword)}&type=json&n=`);
+                const data = await response.json();
+                if (data.code === 200) {
+                    if (Array.isArray(data.data)) {
+                        this.state.currentPlaylist = data.data.map(item => {
+                            const [id, songInfo] = item.split(': ');
+                            return {
+                                songname: songInfo.split(' - ')[0],
+                                name: songInfo.split(' - ')[1],
+                                // 暂不获取 music_url 和 lyric
+                            };
+                        });
+                    } else {
+                        // 如果是单曲数据，将其包装成一个数组
+                        this.state.currentPlaylist = [data.data];
+                    }
+                    this.renderSongList();
+                    // 存储搜索列表数据
+                    this.state.searchListData = this.state.currentPlaylist;
+                } else {
+                    this.showError('未找到相关歌曲');
+                }
             } else {
-                this.showError('未找到相关歌曲');
+                response = await fetch(`${this.apiEndpoints[platform]}?name=${encodeURIComponent(keyword)}&pagesize=100&br=2&n=`);
+                const data = await response.json();
+
+                if (data.code === 0 && data.data.length > 0) {
+                    this.state.currentPlaylist = data.data;
+                    this.renderSongList();
+
+                    // 存储搜索列表数据
+                    this.state.searchListData = data.data;
+                } else {
+                    this.showError('未找到相关歌曲');
+                }
             }
         } catch (error) {
             this.showError('搜索失败，请重试');
@@ -321,26 +349,53 @@ class MusicPlayer {
         if (index < 0 || index >= this.state.currentPlaylist.length) return;
 
         try {
-            const response = await fetch(`${this.apiEndpoints[this.state.platform]}?name=${encodeURIComponent(this.state.lastSearchKeyword)}&n=${index + 1}&br=2&pagesize=100`);
-            const data = await response.json();
-
-            if (data.code === 0) {
+            const platform = this.state.platform;
+            if (platform === 'qqmusic') {
+                const songData = this.state.currentPlaylist[index];
                 this.state.currentSongIndex = index;
-                this.updateNowPlaying(data.data);
-                this.audio.src = data.data.src;
-                this.audio.play();
-                this.highlightCurrentSong();
 
-                // 清除之前的歌词
-                this.clearLyrics();
+                // 专门获取一次 API 以获取完整的歌曲信息
+                const response = await fetch(`${this.apiEndpoints[platform]}${encodeURIComponent(songData.songname)}&type=json&n=${index + 1}`);
+                const fullSongData = await response.json();
+                if (fullSongData.code === 200) {
+                    this.updateNowPlaying(fullSongData.data);
+                    this.audio.src = fullSongData.data.music_url;
+                    this.audio.play();
+                    this.highlightCurrentSong();
 
-                // 只有酷狗音乐时才获取歌词
-                if (this.state.platform === 'kugou' && this.state.searchListData) {
-                    const songInSearchList = this.state.searchListData[index];
-                    if (songInSearchList && songInSearchList.FileHash) {
-                        const lyrics = await this.getKugouLyrics(songInSearchList.FileHash);
-                        if (lyrics) {
-                            this.renderLyrics(lyrics);
+                    // 处理歌词
+                    if (fullSongData.data.lyric) {
+                        const lyrics = this.parseLyrics(fullSongData.data.lyric);
+                        this.renderLyrics(lyrics);
+                    } else {
+                        this.clearLyrics();
+                    }
+                } else {
+                    this.showError('获取歌曲信息失败');
+                }
+            } else {
+                let response;
+                response = await fetch(`${this.apiEndpoints[platform]}?name=${encodeURIComponent(this.state.lastSearchKeyword)}&n=${index + 1}&br=2&pagesize=100`);
+                const data = await response.json();
+
+                if (data.code === 0) {
+                    this.state.currentSongIndex = index;
+                    this.updateNowPlaying(data.data);
+                    this.audio.src = data.data.src;
+                    this.audio.play();
+                    this.highlightCurrentSong();
+
+                    // 清除之前的歌词
+                    this.clearLyrics();
+
+                    // 只有酷狗音乐时才获取歌词
+                    if (this.state.platform === 'kugou' && this.state.searchListData) {
+                        const songInSearchList = this.state.searchListData[index];
+                        if (songInSearchList && songInSearchList.FileHash) {
+                            const lyrics = await this.getKugouLyrics(songInSearchList.FileHash);
+                            if (lyrics) {
+                                this.renderLyrics(lyrics);
+                            }
                         }
                     }
                 }
@@ -364,12 +419,12 @@ class MusicPlayer {
 
     // 更新正在播放的歌曲信息
     updateNowPlaying(songData) {
-        this.songTitle.textContent = songData.songname;
-        this.artistName.textContent = songData.name;
-        this.albumName.textContent = songData.album;
-        this.albumCover.src = songData.cover;
-        document.title = `${songData.songname} - ${songData.name}`;
-    
+        this.songTitle.textContent = songData.song_name || songData.songname;
+        this.artistName.textContent = songData.song_singer || songData.name;
+        this.albumName.textContent = songData.album || '-';
+        this.albumCover.src = songData.cover || '';
+        document.title = `${songData.song_name || songData.songname} - ${songData.song_singer || songData.name}`;
+
         if (this.state.platform === 'kugou' && songData.FileHash) {
             this.getKugouLyrics(songData.FileHash).then(lyricsWithTime => {
                 if (lyricsWithTime) {
@@ -385,6 +440,12 @@ class MusicPlayer {
                     alert('无法获取歌词');
                 }
             });
+        } else if (this.state.platform === 'qqmusic') {
+            // 处理 QQ 音乐的歌词
+            if (songData.lyric) {
+                const lyrics = this.parseLyrics(songData.lyric);
+                this.renderLyrics(lyrics);
+            }
         }
     }
 
@@ -504,6 +565,7 @@ class MusicPlayer {
     showLoading() {
         this.songList.innerHTML = '<div class="loading">搜索中...</div>';
     }
+
 
     showError(message) {
         this.songList.innerHTML = `<div class="error">${message}</div>`;
