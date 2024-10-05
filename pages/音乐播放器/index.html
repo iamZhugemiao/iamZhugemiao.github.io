@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简约音乐播放器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧搜索和播放列表 -->
+        <div class="left-panel">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="搜索音乐...">
+                <select id="platform-select">
+                    <option value="netease">网易云音乐</option>
+                    <option value="kugou">酷狗音乐</option>
+                    <option value="migu">咪咕音乐</option>
+                </select>
+                <button id="search-btn">搜索</button>
+            </div>
+            <div class="playlist" id="song-list">
+                <!-- 歌曲列表将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 右侧播放器控制面板 -->
+        <div class="right-panel">
+            <div class="player-info">
+                <div class="album-cover">
+                    <img id="album-cover" src="/api/placeholder/300/300" alt="封面">
+                </div>
+                <div class="song-info">
+                    <h2 id="current-song">未播放</h2>
+                    <p id="current-artist">-</p>
+                    <p id="current-album">-</p>
+                </div>
+                <div class="lyrics-container"></div>
+            </div>    
+
+            <div class="player-controls">
+                <div class="progress-bar">
+                    <div class="progress" id="progress"></div>
+                    <div class="time">
+                        <span id="current-time">00:00</span>
+                        <span id="duration">00:00</span>
+                    </div>
+                </div>           
+
+                <div class="control-buttons">
+                    <button id="loop-btn" title="循环播放">
+                        <svg id="loop-icon" width="24" height="24"></svg>
+                    </button>                                        
+                    <button id="prev-btn">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path d="M19 20L9 12l10-8v16z"></path>
+                            <rect x="5" y="4" width="2" height="16"></rect>
+                        </svg>
+                    </button>
+                    <button id="play-btn">
+                        <svg id="play-icon" viewBox="0 0 24 24" width="32" height="32">
+                            <path d="M8 5v14l11-7z"></path>
+                        </svg>
+                    </button>
+                    <button id="next-btn">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path d="M5 4l10 8-10 8V4z"></path>
+                            <rect x="17" y="4" width="2" height="16"></rect>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="volume-control">
+                    <svg viewBox="0 0 24 24" width="20" height="20">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"></path>
+                    </svg>
+                    <input type="range" id="volume-slider" min="0" max="100" value="100">
+                </div>
+            </div>
+        </div>
+    </div>
+    <audio id="audio-player"></audio>
+    <script src="script.js"></script>
+</body>
+</html>

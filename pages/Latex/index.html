@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LaTeX & Markdown Editor with OCR</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/auto-render.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .editor-container {
+      display: flex;
+      justify-content: space-between;
+    }
+    .editor, .preview {
+      width: 48%;
+    }
+    textarea {
+      width: 100%;
+      height: 300px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .preview {
+      border: 1px solid #ddd;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+    .upload-section {
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+<h1>LaTeX & Markdown Editor with OCR</h1>
+
+<!-- 图片上传功能 -->
+<div class="upload-section">
+  <h2>Upload an Image to Recognize LaTeX</h2>
+  <input type="file" id="image-input" accept="image/*">
+  <button id="upload-btn">Upload and Recognize</button>
+  <p id="ocr-result"></p>
+</div>
+
+<div class="editor-container">
+  <!-- 输入框 -->
+  <div class="editor">
+    <h2>Input</h2>
+    <textarea id="editor-input" placeholder="Type your Markdown and LaTeX here..."></textarea>
+  </div>
+
+  <!-- 预览区域 -->
+  <div class="preview">
+    <h2>Preview</h2>
+    <div id="editor-preview"></div>
+  </div>
+</div>
+
+<script>
+  const input = document.getElementById('editor-input');
+  const preview = document.getElementById('editor-preview');
+  const imageInput = document.getElementById('image-input');
+  const uploadBtn = document.getElementById('upload-btn');
+  const ocrResult = document.getElementById('ocr-result');
+
+  // 实时渲染 Markdown 和 LaTeX
+  function renderContent() {
+    const markdownText = input.value;
+    let htmlContent = marked.parse(markdownText);
+    preview.innerHTML = htmlContent;
+    renderMathInElement(preview, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  }
+
+  input.addEventListener('input', renderContent);
+  renderContent();
+
+  // 将图片文件转换为Base64编码
+  function convertToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]); // 去掉base64前缀
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // 调用 API 来识别 LaTeX
+  async function recognizeLatex(imageBase64) {
+    try {
+      const response = await fetch('https://fun.djxx.club/math/ocr2.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ image_base64: imageBase64 })
+      });
+      const data = await response.json();
+      if (data.latex && !data.error) {
+        return data.latex;
+      } else {
+        throw new Error(data.error || 'Error recognizing LaTeX');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      return null;
+    }
+  }
+
+  // 处理图片上传和 LaTeX 识别
+  uploadBtn.addEventListener('click', async () => {
+    const file = imageInput.files[0];
+    if (file) {
+      try {
+        const base64Image = await convertToBase64(file);
+        const latex = await recognizeLatex(base64Image);
+        if (latex) {
+          ocrResult.textContent = `Recognized LaTeX: ${latex}`;
+          input.value += `\n${latex}\n`; // 插入到编辑器
+          renderContent();
+        } else {
+          ocrResult.textContent = 'Failed to recognize LaTeX.';
+        }
+      } catch (error) {
+        ocrResult.textContent = 'Error processing image.';
+      }
+    } else {
+      ocrResult.textContent = 'Please select an image file.';
+    }
+  });
+</script>
+
+</body>
+</html>
