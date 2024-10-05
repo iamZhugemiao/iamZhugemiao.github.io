@@ -3,915 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sharon的工具站</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@400;700&family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <title>工具站</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        /* 基础样式 */
-        body {
-            font-family: 'Montserrat', sans-serif;
+        .tab-list {
+            display: flex;
+            list-style: none;
+            padding: 0;
             margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            background-color: var(--bg-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .tab-list li {
+            margin-right: 10px; /* 缩小间距 */
+        }
+
+        .tab-list a {
+            padding: 10px 20px;
+            background-color: var(--background-color);
             color: var(--text-color);
-            transition: background-color 0.3s ease;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            background-color: var(--header-bg);
-            padding: 20px 0;
-        }
-
-        nav ul {
-            list-style-type: none;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-        }
-
-        nav ul li {
-            margin: 0 15px;
-        }
-
-        nav ul li a {
             text-decoration: none;
-            color: var(--nav-text);
-            font-weight: bold;
-            transition: color 0.3s ease;
+            border-radius: 5px 5px 0 0;
+            transition: background-color 0.3s, color 0.3s;
+            border: 2px solid transparent;
+            display: block; /* 使链接占据整个li */
         }
 
-        nav ul li a:hover {
-            color: var(--nav-hover);
+        .tab-list a:hover {
+            background-color: var(--secondary-color);
+            color: var(--white-color);
         }
 
-        h1, h2, h3 {
-            font-family: 'Playfair Display', serif;
+        .tab-list a.active {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            border-color: var(--primary-color);
         }
 
-        /* 按钮样式 */
-        .button {
-            background-color: var(--button-color);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-        }
-
-        .button:hover {
-            transform: scale(1.05);
-            background-color: var(--button-hover-color);
-        }
-
-        /* 下拉框样式 */
-        .theme-selector {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid var(--border-color);
-            background-color: var(--dropdown-bg);
-            color: var(--text-color);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .theme-selector:hover {
-            border-color: var(--button-hover-color);
-        }
-
-        /* 下拉框丝滑展开 */
-        .theme-selector {
-            overflow: hidden;
-            max-height: 40px;
-            transition: max-height 0.3s ease;
-        }
-
-        .theme-selector:focus {
-            max-height: 300px;
-        }
-
-        .theme-selector option {
-            padding: 10px;
-            transition: background-color 0.3s ease;
-        }
-
-        .theme-selector option:hover {
-            background-color: var(--button-hover-color);
-        }
-
-        /* 热搜栏目样式 */
-        .hot-search {
-            margin-top: 30px;
-            background-color: var(--container-bg);
-            border-radius: 10px;
+        .tab-content {
+            margin-top: 10px; /* 调整内容与选项卡的距离 */
+            background-color: var(--background-color);
             padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .hot-search h2 {
-            margin-bottom: 20px;
-        }
-
-        .hot-search-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .hot-search-tab {
-            padding: 5px 10px;
-            background-color: var(--button-color);
-            color: white;
-            border: none;
             border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .hot-search-tab:hover,
-        .hot-search-tab.active {
-            background-color: var(--button-hover-color);
-        }
-
-        .hot-search-content {
+            border: 2px solid var(--primary-color);
             display: none;
         }
 
-        .hot-search-content.active {
+        .tab-content.active {
             display: block;
-        }
-
-        .hot-search-item {
-            padding: 10px;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .hot-search-item:hover {
-            background-color: var(--dropdown-bg);
-        }
-
-        /* 主题切换时的动态效果 */
-        :root {
-            --bg-color: #F0EAD6;
-            --text-color: #333;
-            --button-color: #A5A58D;
-            --button-hover-color: #6B705C;
-            --container-bg: #E9EDC9;
-            --border-color: #CCD5AE;
-            --dropdown-bg: #FEFAE0;
-            --header-bg: #CCD5AE;
-            --nav-text: #333;
-            --nav-hover: #6B705C;
-        }
-
-        /* 主题1：黄绿交映 */
-        .theme-light {
-            --bg-color: #F0EAD6;
-            --text-color: #333;
-            --button-color: #A5A58D;
-            --button-hover-color: #6B705C;
-            --container-bg: #E9EDC9;
-            --border-color: #CCD5AE;
-            --dropdown-bg: #FEFAE0;
-            --header-bg: #CCD5AE;
-            --nav-text: #333;
-            --nav-hover: #6B705C;
-        }
-
-        /* 主题2：碧波翠影 */
-        .theme-blue {
-            --bg-color: #E0E5E9;
-            --text-color: #2C3E50;
-            --button-color: #7C9EB2;
-            --button-hover-color: #5A8CA5;
-            --container-bg: #C2D3DA;
-            --border-color: #A3B9C9;
-            --dropdown-bg: #F0F4F7;
-            --header-bg: #A3B9C9;
-            --nav-text: #2C3E50;
-            --nav-hover: #5A8CA5;
-        }
-
-        /* 主题3：淡紫烟岚 */
-        .theme-pink {
-            --bg-color: #F4E7F2;
-            --text-color: #4A314D;
-            --button-color: #C792B1;
-            --button-hover-color: #B279A7;
-            --container-bg: #E9D2E5;
-            --border-color: #D6B7D4;
-            --dropdown-bg: #FDF4FC;
-            --header-bg: #D6B7D4;
-            --nav-text: #4A314D;
-            --nav-hover: #B279A7;
-        }
-
-        /* 主题4：沙漠晨曦 */
-        .theme-sand {
-            --bg-color: #F2E8DC;
-            --text-color: #5D4037;
-            --button-color: #D7CCC8;
-            --button-hover-color: #BCAAA4;
-            --container-bg: #E6D7C3;
-            --border-color: #D7CCC8;
-            --dropdown-bg: #FFF3E0;
-            --header-bg: #D7CCC8;
-            --nav-text: #5D4037;
-            --nav-hover: #8D6E63;
-        }
-
-        /* 主题5：薄荷清新 */
-        .theme-mint {
-            --bg-color: #E8F5E9;
-            --text-color: #1B5E20;
-            --button-color: #A5D6A7;
-            --button-hover-color: #81C784;
-            --container-bg: #C8E6C9;
-            --border-color: #A5D6A7;
-            --dropdown-bg: #F1F8E9;
-            --header-bg: #A5D6A7;
-            --nav-text: #1B5E20;
-            --nav-hover: #4CAF50;
-        }
-
-        #tools {
-            margin-top: 50px;
-        }
-
-        .email-tool {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .email-tool h3 {
-            margin-bottom: 20px;
-        }
-
-        .email-tool button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .email-tool button:hover {
-            background-color: #0056b3;
-        }
-
-        .email-info {
-            margin-top: 20px;
-            font-size: 18px;
-            background-color: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-        }
-
-        .email-messages {
-            margin-top: 20px;
-            list-style-type: none;
-            padding-left: 0;
-        }
-
-        .email-messages li {
-            padding: 10px;
-            background-color: #f1f3f5;
-            margin-bottom: 10px;
-            border-radius: 5px;
-        }
-
-        .pagination {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .pagination button {
-            padding: 10px 15px;
-            margin: 0 5px;
-            background-color: var(--button-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .pagination button.active {
-            background-color: var(--button-hover-color);
-        }
-
-        /* 隐藏和显示分页内容 */
-        .page-content {
-            display: none;
-        }
-
-        .page-content.active {
-            display: block;
-        }
-
-         /* Bilibili 视频解析工具样式 */
-         .bilibili-tool {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-        }
-
-        .bilibili-tool h3 {
-            margin-bottom: 20px;
-        }
-
-        .bilibili-tool input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 300px;
-            margin-right: 10px;
-        }
-
-        .bilibili-tool button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .bilibili-tool button:hover {
-            background-color: #0056b3;
-        }
-
-        .bilibili-info {
-            margin-top: 20px;
-            background-color: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-        }
-
-        .conversion-tool {
-            margin-top: 30px;
-        }
-
-        .tool-result {
-            margin-top: 15px;
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .tool-container {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        input[type="text"] {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-right: 10px;
-            width: 280px;
-        }
-
-        .button {
-            background-color: var(--button-color);
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-        }
-
-        .button:hover {
-            transform: scale(1.05);
-            background-color: var(--button-hover-color);
         }
     </style>
 </head>
-<body class="theme-light">
-    <header>
-        <nav>
-            <ul>
-                <li><a href="#home" id="home-link">主页</a></li>
-                <li><a href="#tools" id="tools-link">工具</a></li>
-            </ul>
-        </nav>
-    </header>
+<body>
+    <canvas class="vh-bg"></canvas>
 
-    <!-- 主页内容 -->
-    <main id="home-page" class="container">
-        <section id="home">
-            <h1>欢迎来到我的工具站</h1>
-        </section>
-        <section id="theme-selection">
-            <h2>选择主题</h2>
-            <select class="theme-selector" id="theme-selector">
-                <option value="light">黄绿交映</option>
-                <option value="blue">碧波翠影</option>
-                <option value="pink">淡紫烟岚</option>
-                <option value="sand">沙漠晨曦</option>
-                <option value="mint">薄荷清新</option>
-            </select>
-        </section>
-    </main>
-
-    <!-- 工具分页 -->
-    <main id="tools-page" class="container">
-        <section id="tools">
-            <h2>工具</h2>
-            <div class="bilibili-tool">
-                <h3>Bilibili 视频解析工具</h3>
-                <input type="text" id="bvidInput" placeholder="输入BV号，例如：BV1xx411c7Yy">
-                <button id="parseBiliBtn">解析视频</button>
-                <div id="bilibiliInfo" class="bilibili-info"></div>
+    <div class="content">
+        <div class="main-container">
+            <div class="left-section">
+                <img src="Assests/头像.png" alt="头像" class="avatar">
             </div>
-            <div class="email-tool">
-                <h3>临时邮箱工具</h3>
-                <button id="getEmailBtn">申请一个邮箱！</button>
-                <div id="emailInfo" class="email-info"></div>
-                <ul id="emailMessages" class="email-messages"></ul>
-            </div>
-            <div class="hot-search">
-                <h3>今日热搜榜单</h3>
-                <div class="hot-search-tabs">
-                    <button class="hot-search-tab active" data-source="hupu">虎扑</button>
-                    <button class="hot-search-tab" data-source="zhihuDaily">知乎日报</button>
-                    <button class="hot-search-tab" data-source="kr36">36氪</button>
-                    <button class="hot-search-tab" data-source="doubanGroup">豆瓣小组</button>
-                    <button class="hot-search-tab" data-source="ithome">IT之家</button>
-                    <button class="hot-search-tab" data-source="huxiu">虎嗅</button>
-                    <button class="hot-search-tab" data-source="woshipm">woShiPm</button>
-                    <button class="hot-search-tab" data-source="weibo">微博</button>
-                    <button class="hot-search-tab" data-source="toutiao">今日头条</button>
-                    <button class="hot-search-tab" data-source="zhihu">知乎热榜</button>
-                    <button class="hot-search-tab" data-source="bili">哔哩哔哩</button>
-                    <button class="hot-search-tab" data-source="baidu">百度热点</button>
-                    <button class="hot-search-tab" data-source="douyin">抖音</button>
-                    <button class="hot-search-tab" data-source="pengpai">澎湃新闻</button>
-                    <button class="hot-search-tab" data-source="chongbuluo">虫部落</button>
-                </div>
-                <div id="hotSearchContent" class="hot-search-content active">
-
-                </div>
-            </div>
-
-            <!-- Stench Number Tool -->
-            <div class="tool-container stench-tool">
-                <h3>恶臭数字工具</h3>
-                <input type="text" id="stenchInput" placeholder="输入数字">
-                <button id="stenchBtn" class="button">生成恶臭公式</button>
-                <div id="stenchResult" class="tool-result"></div>
-            </div>
-
-            <!-- Short Link Tool -->
-            <div class="tool-container short-link-tool">
-                <h3>长链接转短链接工具</h3>
-                <input type="text" id="longUrlInput" placeholder="输入长链接">
-                <button id="shortLinkBtn" class="button">生成短链接</button>
-                <div id="shortLinkResult" class="tool-result"></div>
-            </div>
-
-            <div class="tool-container conversion-tool">
-                <h3>简繁转换工具</h3>
-                <input type="text" id="convertInput" placeholder="输入需要转换的文本">
-                <button id="convertBtn" class="button">转换</button>
-                <select id="convertType">
-                    <option value="jzf">简转繁</option>
-                    <option value="fzj">繁转简</option>
-                </select>
-                <div id="convertResult" class="tool-result"></div>
-            </div>
-
-            <div class="tool-container express-tool">
-                <h3>快递查询工具</h3>
-                <input type="text" id="expressInput" placeholder="输入快递单号">
-                <button id="expressBtn" class="button">查询快递</button>
-                <div id="expressResult" class="tool-result"></div>
-            </div>         
-            
-            <div class="tool-container poem-tool">
-                <h3>古诗文搜索工具</h3>
-                <input type="text" id="poemInput" placeholder="输入搜索关键词">
-                <button id="poemBtn" class="button">搜索古诗文</button>
-                <div id="poemResult" class="tool-result"></div>
-            </div>            
-
-            <div class="tool-container history-tool">
-                <h3>历史上的今天</h3>
-                <button id="historyBtn" class="button">获取今天的历史事件</button>
-                <div id="historyResult" class="tool-result"></div>
-            </div>          
-            
-            <div class="tool-container video-tool">
-                <h3>聚合视频解析工具</h3>
-                <input type="text" id="videoUrlInput" placeholder="输入需要解析的视频链接">
-                <button id="videoParseBtn" class="button">解析视频</button>
-                <div id="videoResult" class="tool-result"></div>
-            </div>            
-
-            <div class="tool-container website-resource-tool">
-                <h3>获取网站资源工具</h3>
-                <input type="text" id="websiteUrlInput" placeholder="输入网站链接">
-                <button id="websiteResourceBtn" class="button">获取网站资源</button>
-                <div id="websiteResourceResult" class="tool-result"></div>
-            </div>    
-               
-            <div class="tool-container">
-                <h3>AI搜索</h3>
-                <a href="pages/AI搜索/index.html" class="button">打开！</a>
-            </div>   
-            <div class="tool-container">
-                <h3>你按不按下按钮</h3>
-                <a href="pages/你按不按下按钮/index.html" class="button">打开！</a>
-            </div>   
-            <div class="tool-container">
-                <h3>艺术二维码生成</h3>
-                <a href="pages/艺术二维码/index.html" class="button">打开！</a>
-            </div>   
-            <div class="tool-container">
-                <h3>脑筋急转弯</h3>
-                <a href="pages/脑筋急转弯/index.html" class="button">打开！</a>
-            </div>   
-            <div class="tool-container">
-                <h3>文章纠错</h3>
-                <a href="pages/文章纠错/index.html" class="button">打开！</a>
-            </div>   
-            <div class="tool-container">
-                <h3>StableDiffusion绘画工具</h3>
-                <a href="pages/StableDiffusion绘画/index.html" class="button">打开！</a>
-            </div>   
-            <div class="tool-container">
-                <h3>短视频平台解析工具</h3>
-                <a href="pages/短视频平台解析工具/index.html" class="button">打开！</a>
-            </div>   
-        </section>
-    </main>
-    <script>
-        document.getElementById('tools-link').addEventListener('click', function() {
-            document.getElementById('home-page').style.display = 'none';
-            document.getElementById('tools-page').style.display = 'block';
-        });
-        document.getElementById('home-link').addEventListener('click', function() {
-            document.getElementById('home-page').style.display = 'block';
-            document.getElementById('tools-page').style.display = 'none';
-        });
-
-        // 主题切换
-        const themeSelector = document.getElementById('theme-selector');
-        themeSelector.addEventListener('change', function() {
-            document.body.className = 'theme-' + themeSelector.value;
-        });
-        
-        // 热搜功能
-        const hotSearchTabs = document.querySelectorAll('.hot-search-tab');
-        const hotSearchContent = document.getElementById('hotSearchContent');
-
-        function showLoading() {
-            hotSearchContent.innerHTML = '<div class="loading"></div>';
-        }
-
-        async function fetchHotSearchData() {
-            try {
-                const response = await fetch('https://api.vvhan.com/api/hotlist/all');
-                const data = await response.json();
-                return data.data;
-            } catch (error) {
-                console.error('Error fetching hot search data:', error);
-                return [];
-            }
-        }
-
-        function displayHotSearchData(data, source) {
-            hotSearchContent.innerHTML = '';
-            const sourceData = data.find(item => item.name === source);
-            if (sourceData && sourceData.data) {
-                sourceData.data.forEach((item, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'hot-search-item';
-                    div.innerHTML = `
-                        <span class="hot-search-item-title"><strong>${index + 1}.</strong> ${item.title}</span>
-                        <span class="hot-search-item-info">${item.hot || ''}</span>
-                    `;
-                    div.addEventListener('click', () => {
-                        window.open(item.url || item.mobil_url, '_blank');
-                    });
-                    hotSearchContent.appendChild(div);
-                });
-            } else {
-                hotSearchContent.innerHTML = '<p>暂无数据</p>';
-            }
-        }
-
-        let cachedData = null;
-
-        hotSearchTabs.forEach(tab => {
-            tab.addEventListener('click', async () => {
-                hotSearchTabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                const source = tab.textContent;
-                
-                showLoading();
-
-                if (!cachedData) {
-                    cachedData = await fetchHotSearchData();
-                }
-                displayHotSearchData(cachedData, source);
-            });
-        });
-
-        // 初始加载虎扑热搜
-        showLoading();
-        fetchHotSearchData().then(data => {
-            cachedData = data;
-            displayHotSearchData(data, '虎扑');
-        });
-
-        let currentEmail = null;
-
-        document.getElementById('getEmailBtn').addEventListener('click', async function() {
-            if (!currentEmail) {
-                // 申请邮箱
-                const response = await fetch('https://api.pearktrue.cn/api/email/?type=get');
-                const data = await response.json();
-                
-                if (data.code === 200) {
-                    currentEmail = data.email;
-                    document.getElementById('emailInfo').innerText = `您的临时邮箱: ${currentEmail}，有效时间: ${data.time}`;
-                    document.getElementById('emailInfo').style.display = 'block';
-                    
-                    // 更改按钮为“刷新收件箱”
-                    this.innerText = '刷新收件箱！';
-                }
-            } else {
-                // 刷新收件箱
-                const response = await fetch(`https://api.pearktrue.cn/api/email/?type=receive&email=${currentEmail}`);
-                const data = await response.json();
-
-                if (data.code === 200 && data.receivedata.length > 0) {
-                    const messagesList = document.getElementById('emailMessages');
-                    messagesList.innerHTML = ''; // 清空之前的邮件列表
-                    data.receivedata.forEach((message) => {
-                        const listItem = document.createElement('li');
-                        listItem.innerHTML = `
-                            <strong>发件人:</strong> ${message.from}<br>
-                            <strong>主题:</strong> ${message.subject}<br>
-                            <strong>时间:</strong> ${message.time}<br>
-                            <strong>内容:</strong> <div>${message.body.html}</div>
-                        `;
-                        messagesList.appendChild(listItem);
-                    });
-                } else {
-                    document.getElementById('emailMessages').innerHTML = '<li>暂无新邮件</li>';
-                }
-            }
-        });
-
-        // 分页切换逻辑
-        const pageButtons = document.querySelectorAll('.page-btn');
-        const pages = document.querySelectorAll('.page-content');
-
-        pageButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const pageId = this.getAttribute('data-page');
-
-                // 切换分页按钮的 active 样式
-                pageButtons.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-
-                // 切换显示内容
-                pages.forEach(page => {
-                    if (page.id === 'page-' + pageId) {
-                        page.classList.add('active');
-                    } else {
-                        page.classList.remove('active');
-                    }
-                });
-            });
-        });
-
-        document.getElementById('parseBiliBtn').addEventListener('click', async function() {
-            const bvid = document.getElementById('bvidInput').value;
-            const bilibiliInfoDiv = document.getElementById('bilibiliInfo');
-
-            if (bvid) {
-                // 调用API
-                const response = await fetch(`https://api.pearktrue.cn/api/bilibili/parse.php?bvid=${bvid}`);
-                const data = await response.json();
-
-                if (data.code === 200) {
-                    const videoData = data.data;
-                    bilibiliInfoDiv.innerHTML = `
-                        <p><strong>视频标题:</strong> ${videoData.title}</p>
-                        <p><strong>UP主:</strong> ${videoData.author}</p>
-                        <p><strong>视频描述:</strong> ${videoData.desc.replace(/\n/g, '<br>')}</p>
-                        <p><strong>视频格式:</strong> ${videoData.videos[0].format} - 大小: ${videoData.videos[0].size}</p>
-                        <p><a href="${videoData.videos[0].videourl}" target="_blank">点击下载视频</a></p>
-                    `;
-                    bilibiliInfoDiv.style.display = 'block';
-                } else {
-                    bilibiliInfoDiv.innerHTML = `<p>解析失败，请检查BV号是否正确。</p>`;
-                    bilibiliInfoDiv.style.display = 'block';
-                }
-            } else {
-                bilibiliInfoDiv.innerHTML = `<p>请输入有效的BV号。</p>`;
-                bilibiliInfoDiv.style.display = 'block';
-            }
-        });
-
-        // Stench Number Tool Logic
-        document.getElementById('stenchBtn').addEventListener('click', async function() {
-            const num = document.getElementById('stenchInput').value;
-            const resultDiv = document.getElementById('stenchResult');
-
-            if (num) {
-                const response = await fetch(`https://api.pearktrue.cn/api/stench/?num=${num}`);
-                const data = await response.json();
-
-                if (data.code === 200) {
-                    resultDiv.innerHTML = `<p><strong>公式:</strong> ${data.stench}</p>`;
-                } else {
-                    resultDiv.innerHTML = `<p>生成失败，请检查输入。</p>`;
-                }
-            } else {
-                resultDiv.innerHTML = `<p>请输入一个有效的数字。</p>`;
-            }
-        });
-
-        // Short Link Tool Logic
-        document.getElementById('shortLinkBtn').addEventListener('click', async function() {
-            const longUrl = document.getElementById('longUrlInput').value;
-            const shortLinkResultDiv = document.getElementById('shortLinkResult');
-            if (longUrl) {
-                const response = await fetch(`https://api.pearktrue.cn/api/short/dwz.php?url=${encodeURIComponent(longUrl)}`);
-                const data = await response.json();
-                if (data.code === 200) {
-                    shortLinkResultDiv.innerHTML = `<p><strong>短链接:</strong> <a href="${data.short_url}" target="_blank">${data.short_url}</a></p>`;
-                } else {
-                    shortLinkResultDiv.innerHTML = `<p>生成失败，请检查输入的链接。</p>`;
-                }
-            } else {
-                shortLinkResultDiv.innerHTML = `<p>请输入一个有效的长链接。</p>`;
-            }
-        });
-
-
-        document.getElementById('convertBtn').addEventListener('click', async function() {
-            const text = document.getElementById('convertInput').value;
-            const type = document.getElementById('convertType').value;
-            const resultDiv = document.getElementById('convertResult');
-
-            if (text) {
-                const response = await fetch(`https://api.pearktrue.cn/api/conversion/word.php?text=${encodeURIComponent(text)}&type=${type}`);
-                const data = await response.json();
-                
-                if (data.code === 200) {
-                    resultDiv.innerHTML = `<p><strong>转换后:</strong> ${data.conversion}</p>`;
-                } else {
-                    resultDiv.innerHTML = `<p>转换失败，请检查输入。</p>`;
-                }
-            } else {
-                resultDiv.innerHTML = `<p>请输入需要转换的文本。</p>`;
-            }
-        });
-        document.getElementById('expressBtn').addEventListener('click', async function() {
-            const order = document.getElementById('expressInput').value;
-            const resultDiv = document.getElementById('expressResult');
-            
-            if (order) {
-                const response = await fetch(`https://api.pearktrue.cn/api/kuaidi/?order=${encodeURIComponent(order)}`);
-                const data = await response.json();
-
-                if (data.code === 200) {
-                    resultDiv.innerHTML = `
-                        <p><strong>快递公司:</strong> ${data.company}</p>
-                        <p><strong>单号:</strong> ${data.mailNo}</p>
-                        <h4>物流信息:</h4>
-                        ${data.data.map(item => `<p>${item.time} - ${item.context}</p>`).join('')}
-                    `;
-                } else {
-                    resultDiv.innerHTML = `<p>查询失败，请检查输入的快递单号。</p>`;
-                }
-            } else {
-                resultDiv.innerHTML = `<p>请输入有效的快递单号。</p>`;
-            }
-        });
-
-        document.getElementById('poemBtn').addEventListener('click', async function() {
-            const keyword = document.getElementById('poemInput').value;
-            const resultDiv = document.getElementById('poemResult');
-
-            if (keyword) {
-                const response = await fetch(`https://api.pearktrue.cn/api/shiwen/?keyword=${encodeURIComponent(keyword)}`);
-                const data = await response.json();
-
-                if (data.code === '200') {
-                    resultDiv.innerHTML = data.data.map(poem => `
-                        <h4>${poem.title} - ${poem.author} (${poem.dynasty})</h4>
-                        <p>${poem.content.replace(/\n/g, '<br>')}</p>
-                    `).join('');
-                } else {
-                    resultDiv.innerHTML = `<p>查询失败，请检查输入的关键词。</p>`;
-                }
-            } else {
-                resultDiv.innerHTML = `<p>请输入搜索关键词。</p>`;
-            }
-        });
-
-        document.getElementById('historyBtn').addEventListener('click', async function() {
-            const resultDiv = document.getElementById('historyResult');
-
-            const response = await fetch('https://api.pearktrue.cn/api/lsjt/?type=json');
-            const data = await response.json();
-
-            if (data.code === 200) {
-                resultDiv.innerHTML = `
-                    <p><strong>日期:</strong> ${data.time}</p>
-                    <h4>历史事件:</h4>
-                    <ul>
-                        ${data.data.map(event => `<li>${event}</li>`).join('')}
+            <div class="center-section">
+                <div class="intro">
+                    <h1>欢迎来到Sharon的工具站</h1>
+                    <p>请选择一个工具进行操作。</p>
+                    <h2>工具选项</h2>
+                    <ul class="tab-list">
+                        <li><a href="#" class="tab-link active" data-target="#music-player">音乐播放器</a></li>
                     </ul>
-                `;
-            } else {
-                resultDiv.innerHTML = `<p>获取失败，请稍后再试。</p>`;
-            }
+
+                    <div id="music-player" class="tab-content active">
+                        <p>这是一个音乐播放器，里面可以联网搜索歌曲。</p>
+                        <a href="pages/音乐播放器/index.html" class="styled-btn">进入音乐播放器</a>
+                    </div>
+                </div>
+            </div>
+            <div class="new-right-section">
+                <div id="today-weather" class="weather-container">
+                    <h3>今日天气</h3>
+                    <div id="weather-info">
+                        <p>加载中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        const tabLinks = document.querySelectorAll('.tab-link');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('data-target');
+
+                tabLinks.forEach(tab => tab.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                this.classList.add('active');
+                document.querySelector(targetId).classList.add('active');
+            });
         });
 
-        document.getElementById('videoParseBtn').addEventListener('click', async function() {
-            const videoUrl = document.getElementById('videoUrlInput').value;
-            const resultDiv = document.getElementById('videoResult');
-
-            if (videoUrl) {
-                const response = await fetch(`https://api.pearktrue.cn/api/video/api.php?url=${encodeURIComponent(videoUrl)}`);
-                const data = await response.json();
-
-                if (data.code === 200) {
-                    resultDiv.innerHTML = `
-                        <p><strong>视频标题:</strong> ${data.data.title}</p>
-                        <p><a href="${data.data.url}" target="_blank" class="button">点击下载视频</a></p>
-                    `;
+        async function fetchWeather() {
+            try {
+                const weatherResponse = await fetch('https://api.vvhan.com/api/weather');
+                const weatherData = await weatherResponse.json();
+                if (weatherData.success) {
+                    displayWeather(weatherData);
                 } else {
-                    resultDiv.innerHTML = `<p>解析失败，请检查输入的链接。</p>`;
+                    document.getElementById('weather-info').innerHTML = '<p>获取天气信息失败</p>';
                 }
-            } else {
-                resultDiv.innerHTML = `<p>请输入有效的视频链接。</p>`;
+            } catch (error) {
+                console.error('获取天气信息时出错:', error);
+                document.getElementById('weather-info').innerHTML = '<p>获取天气信息失败</p>';
             }
-        });
+        }
 
-        document.getElementById('websiteResourceBtn').addEventListener('click', async function() {
-            const websiteUrl = document.getElementById('websiteUrlInput').value;
-            const resultDiv = document.getElementById('websiteResourceResult');
+        function displayWeather(weatherData) {
+            const weatherInfo = document.getElementById('weather-info');
+            const data = weatherData.data;
 
-            if (websiteUrl) {
-                const response = await fetch(`https://api.pearktrue.cn/api/website/resources.php?url=${encodeURIComponent(websiteUrl)}`);
-                const data = await response.json();
+            weatherInfo.innerHTML = `
+                <p><strong>天气：</strong> ${data.type}</p>
+                <p><strong>温度：</strong> ${data.low} ~ ${data.high}</p>
+                <p><strong>风向：</strong> ${data.fengxiang} (${data.fengli})</p>
+            `;
+        }
 
-                if (data.code === "200") {
-                    resultDiv.innerHTML = `
-                        <p><strong>资源总数:</strong> ${data.count}</p>
-                        <h4>资源列表:</h4>
-                        <ul>
-                            ${data.data.list.map(resource => `
-                                <li>
-                                    <strong>类型:</strong> ${resource.type} 
-                                    <strong>名称:</strong> ${resource.name} 
-                                    <a href="${resource.src}" target="_blank">下载资源</a>
-                                </li>
-                            `).join('')}
-                        </ul>
-                    `;
-                } else {
-                    resultDiv.innerHTML = `<p>获取失败，请检查输入的网站链接。</p>`;
-                }
-            } else {
-                resultDiv.innerHTML = `<p>请输入有效的网站链接。</p>`;
-            }
-        });
+        window.onload = fetchWeather;
     </script>
 </body>
 </html>
