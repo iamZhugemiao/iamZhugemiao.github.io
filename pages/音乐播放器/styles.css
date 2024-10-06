@@ -364,3 +364,65 @@ body {
 .loading-lyrics {
     color: rgba(255, 255, 255, 0.7);
 }
+
+.container {
+    display: flex;
+    flex-wrap: wrap; /* 允许换行 */
+}
+
+/* 左侧面板样式 */
+.left-panel {
+    width: 100%; /* 在小屏幕上占满一行 */
+}
+
+.right-panel {
+    width: 100%; /* 在小屏幕上占满一行 */
+}
+
+/* 在大屏幕上调整 */
+@media (min-width: 600px) {
+    .left-panel {
+        width: 40%; /* 40% 的宽度 */
+    }
+
+    .right-panel {
+        width: 60%; /* 60% 的宽度 */
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1200px; /* 最大宽度 */
+    }
+}
+
+/* 调整字体和按钮大小 */
+@media (max-width: 600px) {
+    .search-box input,
+    .search-box select,
+    .search-box button {
+        font-size: 14px; /* 小屏幕字体 */
+    }
+
+    .control-buttons button {
+        width: 40px; /* 更小的按钮 */
+        height: 40px;
+    }
+
+    .album-cover {
+        width: 200px; /* 较小封面 */
+        height: 200px;
+    }
+}
+
+@media (min-width: 601px) and (max-width: 1200px) {
+    .control-buttons button {
+        width: 50px; /* 中等按钮 */
+        height: 50px;
+    }
+
+    .album-cover {
+        width: 250px; /* 中等封面 */
+        height: 250px;
+    }
+}
