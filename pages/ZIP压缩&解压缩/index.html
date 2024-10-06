@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ZIP 压缩&解压缩</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        :root {
+            --primary-color: #007BFF;
+            --secondary-color: #E9F3FF;
+            --background-color: #F8F9FA;
+            --white-color: #FFFFFF;
+            --text-color: #343A40;
+            --shadow-color: #CED4DA;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .form-horizontal {
+            background-color: var(--white-color);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--primary-color);
+            border-radius: 10px;
+            padding: 30px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .drop-zone:hover {
+            background-color: var(--secondary-color);
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .download-all {
+            margin-top: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--primary-color);
+        }
+
+        .hint {
+            margin: 10px 0;
+            color: #555;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<h1>ZIP压缩 & 解压缩工具</h1>
+<div class="form-horizontal">
+    <div class="form-group">
+        <div class="drop-zone" id="drop-zone" ondragover="event.preventDefault()" ondrop="handleDrop(event)" onclick="document.getElementById('file-upload').click()">
+            把文件拖到这里  或  点击来选择文件
+            <input id="file-upload" type="file" accept=".zip, .txt, .png, .jpeg, .jpg" multiple style="display:none" onchange="handleFiles(this.files)">
+        </div>
+    </div>
+    <p class="hint">解压时请只上传一个ZIP文件</p>
+    <div class="form-group">
+        <button id="unzip-files" type="button" class="btn btn-lg btn-secondary" onclick="unzipFiles()">解压缩</button>
+        <button id="compress-files" type="button" class="btn btn-lg btn-primary" onclick="compressFiles()">压缩成ZIP</button>
+    </div>
+
+    <div class="form-group">
+        <div id="loading">加载中...</div>
+    </div>
+
+    <ul class="directory-tree" id="directory-tree"></ul>
+    <div id="download-all" class="download-all" onclick="downloadAllFiles()" style="display:none;">一键下载！</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+
+<script>
+    let zipFile = null;
+    let zipData = null;
+
+    function handleDrop(event) {
+        event.preventDefault();
+        handleFiles(event.dataTransfer.files);
+    }
+
+    function handleFiles(files) {
+        if (files.length > 0) {
+            zipFile = files[0];
+        }
+    }
+
+    async function unzipFiles() {
+        if (!zipFile) {
+            alert("请先上传一个ZIP文件！");
+            return;
+        }
+
+        if (!validateZipFile(zipFile)) return;
+
+        document.getElementById("loading").style.display = "block";
+
+        const reader = new FileReader();
+        reader.onload = async function() {
+            zipData = await JSZip.loadAsync(reader.result);
+
+            const directoryTree = document.getElementById("directory-tree");
+            directoryTree.innerHTML = "";
+
+            const zipContents = Object.keys(zipData.files).filter(path => path.trim() !== "");
+            const fileTree = buildFileTree(zipContents);
+
+            renderDirectoryTree(directoryTree, fileTree);
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("download-all").style.display = "block"; // 显示一键下载按钮
+        };
+        reader.readAsArrayBuffer(zipFile);
+    }
+
+    function validateZipFile(file) {
+        const allowedTypes = ['application/zip', 'application/x-zip-compressed', 'application/x-zip', 'application/octet-stream'];
+        if (!allowedTypes.includes(file.type)) {
+            alert("请上传有效的ZIP文件！");
+            return false;
+        }
+        return true;
+    }
+
+    function buildFileTree(paths) {
+        const tree = {};
+
+        paths.forEach(path => {
+            const parts = path.split('/');
+            let currentNode = tree;
+
+            parts.forEach((part, idx) => {
+                if (!currentNode[part]) {
+                    currentNode[part] = idx === parts.length - 1 ? null : {};
+                }
+                currentNode = currentNode[part];
+            });
+        });
+
+        return tree;
+    }
+
+    function renderDirectoryTree(parent, tree, path = '') {
+        Object.keys(tree).forEach(key => {
+            const fullPath = path ? `${path}/${key}` : key;
+
+            if (key.trim() === "") return;
+
+            const item = document.createElement("li");
+
+            if (tree[key] === null) {
+                item.innerHTML = `<a href="#" onclick="downloadFile('${fullPath}')">${key}</a>`;
+            } else {
+                item.innerHTML = `<strong>${key}</strong>`;
+                const subTree = document.createElement("ul");
+                renderDirectoryTree(subTree, tree[key], fullPath);
+                item.appendChild(subTree);
+            }
+
+            parent.appendChild(item);
+        });
+    }
+
+    async function downloadFile(fullPath) {
+        const file = zipData.file(fullPath);
+        if (file) {
+            const blob = await file.async("blob");
+            saveAs(blob, fullPath.split('/').pop());
+        } else {
+            alert("文件未找到：" + fullPath);
+        }
+    }
+
+    function downloadAllFiles() {
+        Object.keys(zipData.files).forEach(async (filePath) => {
+            const file = zipData.file(filePath);
+            if (file) {
+                const blob = await file.async("blob");
+                saveAs(blob, filePath.split('/').pop());
+            }
+        });
+    }
+
+    function compressFiles() {
+        const filesToCompress = document.getElementById("file-upload").files;
+
+        if (filesToCompress.length === 0) {
+            alert("请先选择要压缩的文件！");
+            return;
+        }
+
+        document.getElementById("loading").style.display = "block";
+
+        const zip = new JSZip();
+        const compressPromises = Array.from(filesToCompress).map(file => {
+            return file.arrayBuffer().then(buffer => zip.file(file.name, buffer));
+        });
+
+        Promise.all(compressPromises).then(() => {
+            zip.generateAsync({ type: "blob" }).then(blob => {
+                saveAs(blob, "compressed.zip");
+                document.getElementById("loading").style.display = "none";
+            });
+        });
+    }
+
+    function validateCompressFile(file) {
+        const allowedTypes = ['application/zip', 'application/x-zip-compressed', 'application/x-zip', 'application/octet-stream', 'text/plain', 'image/png', 'image/jpeg'];
+        if (!allowedTypes.includes(file.type)) {
+            alert("请上传有效的文件类型！");
+            return false;
+        }
+        return true;
+    }
+</script>
+<script src="https://api.cenguigui.cn/api/ciganxian"></script>
+</body>
+</html>
