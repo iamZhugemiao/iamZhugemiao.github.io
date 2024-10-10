@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="referrer" content="no-referrer">
+        <title>媒体解析工具</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+        <style>
+            * {
+                box-sizing: border-box;
+                transition: all 0.3s ease;
+            }
+    
+            body {
+                margin: 0;
+                padding: 20px;
+                min-height: 100vh;
+                font-family: 'PingFang SC', sans-serif; /* 添加微软雅黑字体 */
+                background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+                display: flex;
+                justify-content: center; /* 居中内容 */
+                align-items: center; /* 垂直居中 */
+                animation: gradientBG 15s ease infinite;
+                background-size: 400% 400%;
+            }
+    
+            @keyframes gradientBG {
+                0% { background-position: 0% 50% }
+                50% { background-position: 100% 50% }
+                100% { background-position: 0% 50% }
+            }
+    
+            .container {
+                text-align: center; /* 让容器内文本居中 */
+                width: 90%;
+                max-width: 1200px;
+                background: rgba(255, 255, 255, 0.85);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                animation: containerAppear 0.5s ease-out;
+            }
+    
+            @keyframes containerAppear {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+    
+            .input-section {
+                margin-bottom: 30px;
+            }
+    
+            .input-group {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+    
+            input[type="text"] {
+                flex: 1;
+                padding: 12px 20px;
+                border: 2px solid #ddd;
+                border-radius: 12px;
+                font-size: 16px;
+                background: rgba(255, 255, 255, 0.9);
+                transition: all 0.3s ease;
+            }
+    
+            input[type="text"]:focus {
+                outline: none;
+                border-color: #4CAF50;
+                box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+            }
+    
+            button {
+                background: #4CAF50;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 12px;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+    
+            button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            }
+    
+            button:active {
+                transform: translateY(0);
+            }
+    
+            .radio-group {
+                display: flex;
+                gap: 20px;
+                margin-bottom: 15px;
+            }
+    
+            .radio-group label {
+                cursor: pointer;
+                padding: 8px 16px;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+            }
+    
+            .radio-group label:hover {
+                background: rgba(76, 175, 80, 0.1);
+            }
+    
+            .result-section {
+                margin-top: 30px;
+            }
+    
+            .video-result {
+                background: rgba(255, 255, 255, 0.9);
+                padding: 20px;
+                border-radius: 15px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            }
+    
+            .image-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+            }
+    
+            .image-item {
+                position: relative;
+                aspect-ratio: 1;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                transition: transform 0.3s ease;
+            }
+    
+            .image-item:hover {
+                transform: translateY(-5px);
+            }
+    
+            .image-item img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 12px;
+                transition: transform 0.3s ease;
+            }
+    
+            .image-item:hover img {
+                transform: scale(1.05);
+            }
+    
+            .image-checkbox {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                transform: scale(1.5);
+                z-index: 1;
+                background: white;
+                border-radius: 3px;
+                cursor: pointer;
+                opacity: 0.8;
+                transition: all 0.3s ease;
+            }
+    
+            .image-checkbox:hover {
+                opacity: 1;
+            }
+    
+            .download-section {
+                margin-top: 20px;
+                display: flex;
+                gap: 10px;
+            }
+    
+            #selectAll {
+                background: #2196F3;
+            }
+    
+            #downloadSelected {
+                background: #ff9800;
+            }
+    
+            .loading {
+                text-align: center;
+                padding: 20px;
+                animation: pulse 1.5s infinite;
+            }
+    
+            @keyframes pulse {
+                0% { opacity: 0.6; }
+                50% { opacity: 1; }
+                100% { opacity: 0.6; }
+            }
+    
+            .download-progress {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                animation: slideIn 0.3s ease;
+            }
+    
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        </style>
+    </head>
+<body>
+    <div class="container">
+        <h1>媒体解析工具</h1>
+        
+        <div class="input-section">
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="type" value="image" checked> 图片解析
+                </label>
+                <label>
+                    <input type="radio" name="type" value="video"> 视频解析
+                </label>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" id="urlInput" placeholder="请输入链接...">
+                <button onclick="parseMedia()">解析</button>
+            </div>
+        </div>
+
+        <div class="result-section" id="resultSection"></div>
+    </div>
+
+    <script>
+        function processImageUrl(url) {
+            // 使用encodeURIComponent处理完整URL，确保特殊字符被正确编码
+            try {
+                // 分割URL，处理感叹号后的部分
+                const [baseUrl, params] = url.split('!');
+                if (params) {
+                    return `${encodeURIComponent(baseUrl)}!${encodeURIComponent(params)}`;
+                }
+                return encodeURIComponent(url);
+            } catch (e) {
+                return encodeURIComponent(url);
+            }
+        }
+
+        async function parseMedia() {
+            const url = document.getElementById('urlInput').value;
+            const type = document.querySelector('input[name="type"]:checked').value;
+            const resultSection = document.getElementById('resultSection');
+            
+            if (!url) {
+                alert('请输入链接');
+                return;
+            }
+
+            resultSection.innerHTML = '<div class="loading">正在解析中...</div>';
+
+            try {
+                const baseUrl = type === 'image' 
+                    ? 'https://www.hhlqilongzhu.cn/api/sp_jx/tuji.php'
+                    : 'https://www.hhlqilongzhu.cn/api/sp_jx/sp.php';
+                
+                const response = await axios.get(`${baseUrl}?url=${encodeURIComponent(url)}`);
+                const data = response.data;
+
+                if (data.code === 200) {
+                    if (type === 'image') {
+                        displayImages(data.data);
+                    } else {
+                        displayVideo(data.data);
+                    }
+                } else {
+                    alert('解析失败：' + data.msg);
+                }
+            } catch (error) {
+                alert('解析出错：' + error.message);
+                resultSection.innerHTML = '';
+            }
+        }
+
+        function displayImages(data) {
+            const resultSection = document.getElementById('resultSection');
+            const images = data.images;
+            
+            let html = `
+                <h2>${data.title}</h2>
+                <p>作者：${data.author}</p>
+                <div class="download-section">
+                    <button onclick="toggleSelectAll()" id="selectAll">全选</button>
+                    <button onclick="downloadSelected()" id="downloadSelected">下载选中图片</button>
+                </div>
+                <div class="image-grid">
+            `;
+
+            images.forEach((img, index) => {
+                // 直接使用原始URL，通过img标签的crossorigin属性处理跨域
+                html += `
+                    <div class="image-item">
+                        <input type="checkbox" class="image-checkbox" data-url="${img}">
+                        <img src="${img}" 
+                             crossorigin="anonymous" 
+                             alt="图片${index + 1}" 
+                             referrerpolicy="no-referrer"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'200\\' height=\\'200\\'%3E%3Crect width=\\'200\\' height=\\'200\\' fill=\\'%23ddd\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23666\\' font-size=\\'16\\'%3E加载失败%3C/text%3E%3C/svg%3E'">
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            resultSection.innerHTML = html;
+        }
+
+        function displayVideo(data) {
+            const resultSection = document.getElementById('resultSection');
+            resultSection.innerHTML = `
+                <div class="video-result">
+                    <h2>${data.title}</h2>
+                    <p>作者：${data.author}</p>
+                    <p>时长/发布时间：${data.time}</p>
+                    <img src="${data.cover}" 
+                         crossorigin="anonymous" 
+                         referrerpolicy="no-referrer"
+                         alt="封面" 
+                         style="max-width: 300px" 
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'169\\'%3E%3Crect width=\\'300\\' height=\\'169\\' fill=\\'%23ddd\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23666\\' font-size=\\'16\\'%3E封面加载失败%3C/text%3E%3C/svg%3E'">
+                    <p>
+                        <a href="${data.url}" target="_blank">
+                            <button onclick="downloadVideo('${data.url}', '${data.title}')">下载视频</button>
+                        </a>
+                    </p>
+                </div>
+            `;
+        }
+
+        async function downloadVideo(url, title) {
+            // 创建进度提示
+            const progressDiv = document.createElement('div');
+            progressDiv.className = 'download-progress';
+            progressDiv.textContent = '正在下载视频...';
+            document.body.appendChild(progressDiv);
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('下载失败');
+                
+                const blob = await response.blob();
+                
+                // 创建下载链接
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                // 使用视频标题作为文件名，移除不合法的文件名字符
+                const fileName = `${title.replace(/[<>:"/\\|?*]+/g, '_')}.mp4`;
+                link.download = fileName;
+                
+                document.body.appendChild(link);
+                link.click();
+                
+                // 清理
+                URL.revokeObjectURL(link.href);
+                document.body.removeChild(link);
+            } catch (error) {
+                alert('视频下载失败: ' + error.message);
+            } finally {
+                document.body.removeChild(progressDiv);
+            }
+        }
+
+        function toggleSelectAll() {
+            const checkboxes = document.querySelectorAll('.image-checkbox');
+            const selectAllBtn = document.getElementById('selectAll');
+            const isSelectAll = selectAllBtn.textContent === '全选';
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = isSelectAll;
+            });
+            
+            selectAllBtn.textContent = isSelectAll ? '取消全选' : '全选';
+        }
+
+        async function downloadSelected() {
+            const selectedImages = Array.from(document.querySelectorAll('.image-checkbox:checked'))
+                .map(checkbox => checkbox.dataset.url);
+            
+            if (selectedImages.length === 0) {
+                alert('请选择要下载的图片');
+                return;
+            }
+
+            // 创建下载进度提示
+            const progressDiv = document.createElement('div');
+            progressDiv.className = 'download-progress';
+            document.body.appendChild(progressDiv);
+
+            try {
+                for (let i = 0; i < selectedImages.length; i++) {
+                    const url = selectedImages[i];
+                    progressDiv.textContent = `正在下载 ${i + 1}/${selectedImages.length}`;
+                    
+                    try {
+                        // 获取图片数据
+                        const response = await fetch(url);
+                        if (!response.ok) throw new Error('下载失败');
+                        
+                        const blob = await response.blob();
+                        
+                        // 创建下载链接
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = `image_${Date.now()}.jpg`; // 设置下载文件名
+                        document.body.appendChild(link);
+                        link.click();
+                        
+                        // 清理
+                        URL.revokeObjectURL(link.href);
+                        document.body.removeChild(link);
+                        
+                        // 添加小延迟，避免浏览器限制
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    } catch (error) {
+                        console.error(`下载图片失败: ${url}`, error);
+                    }
+                }
+            } finally {
+                // 移除进度提示
+                document.body.removeChild(progressDiv);
+            }
+        }
+    </script>
+    <script src="https://api.cenguigui.cn/api/sjcaidai"></script>
+</body>
+</html>
