@@ -279,7 +279,7 @@
     </head>
 <body>
     <div class="container">
-        <h1>图片视频解析工具</h1>
+        <h1>媒体解析工具</h1>
         
         <div class="input-section">
             <div class="radio-group">
@@ -463,65 +463,38 @@
             progressDiv.className = 'download-progress';
             document.body.appendChild(progressDiv);
 
-            // 检测是否为移动设备
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            
-            if (isMobile) {
-                progressDiv.innerHTML = `
-                    <div style="text-align: center;">
-                        <p>正在尝试下载，如果下载失败，请点击"在新页面打开"</p>
-                        <button onclick="openImagesInNewTabs()" style="margin: 10px 0; background: #2196F3;">
-                            在新页面打开
-                        </button>
-                        <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 5px;">
-                            关闭提示
-                        </button>
-                    </div>
-                `;
-            }
-
             try {
                 for (let i = 0; i < selectedImages.length; i++) {
                     const url = selectedImages[i];
                     progressDiv.textContent = `正在下载 ${i + 1}/${selectedImages.length}`;
                     
                     try {
+                        // 获取图片数据
                         const response = await fetch(url);
                         if (!response.ok) throw new Error('下载失败');
                         
                         const blob = await response.blob();
+                        
+                        // 创建下载链接
                         const link = document.createElement('a');
                         link.href = URL.createObjectURL(blob);
-                        link.download = `image_${Date.now()}_${i + 1}.jpg`;
+                        link.download = `image_${Date.now()}.jpg`; // 设置下载文件名
                         document.body.appendChild(link);
                         link.click();
                         
+                        // 清理
                         URL.revokeObjectURL(link.href);
                         document.body.removeChild(link);
                         
+                        // 添加小延迟，避免浏览器限制
                         await new Promise(resolve => setTimeout(resolve, 500));
                     } catch (error) {
                         console.error(`下载图片失败: ${url}`, error);
-                        if (isMobile) {
-                            progressDiv.innerHTML = `
-                                <div style="text-align: center;">
-                                    <p>下载失败，请点击"在新页面打开"后长按保存</p>
-                                    <button onclick="openImagesInNewTabs()" style="margin: 10px 0; background: #2196F3;">
-                                        在新页面打开
-                                    </button>
-                                    <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 5px;">
-                                        关闭提示
-                                    </button>
-                                </div>
-                            `;
-                            return;
-                        }
                     }
                 }
             } finally {
-                if (!isMobile) {
-                    document.body.removeChild(progressDiv);
-                }
+                // 移除进度提示
+                document.body.removeChild(progressDiv);
             }
         }
 
