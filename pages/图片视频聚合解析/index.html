@@ -458,38 +458,28 @@
                 return;
             }
 
-            // 检测是否为移动设备
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
             // 创建下载进度提示
             const progressDiv = document.createElement('div');
             progressDiv.className = 'download-progress';
             document.body.appendChild(progressDiv);
 
+            // 检测是否为移动设备
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
             if (isMobile) {
-                // 移动端显示提示并打开新标签页
                 progressDiv.innerHTML = `
                     <div style="text-align: center;">
-                        <p>正在打开图片，请长按图片选择"保存图片"</p>
-                        <small>已选择 ${selectedImages.length} 张图片</small>
-                        <button onclick="this.parentElement.parentElement.remove()" 
-                                style="margin-top: 10px; padding: 5px 10px; display: block; width: 100%;">
-                            我知道了
+                        <p>正在尝试下载，如果下载失败，请点击"在新页面打开"</p>
+                        <button onclick="openImagesInNewTabs()" style="margin: 10px 0; background: #2196F3;">
+                            在新页面打开
+                        </button>
+                        <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 5px;">
+                            关闭提示
                         </button>
                     </div>
                 `;
-                
-                // 依次打开图片
-                selectedImages.forEach((url, index) => {
-                    setTimeout(() => {
-                        window.open(url, '_blank');
-                    }, index * 300); // 间隔300ms打开，避免浏览器阻止
-                });
-                
-                return;
             }
 
-            // PC端下载逻辑保持不变
             try {
                 for (let i = 0; i < selectedImages.length; i++) {
                     const url = selectedImages[i];
@@ -502,7 +492,7 @@
                         const blob = await response.blob();
                         const link = document.createElement('a');
                         link.href = URL.createObjectURL(blob);
-                        link.download = `image_${Date.now()}.jpg`;
+                        link.download = `image_${Date.now()}_${i + 1}.jpg`;
                         document.body.appendChild(link);
                         link.click();
                         
@@ -512,12 +502,39 @@
                         await new Promise(resolve => setTimeout(resolve, 500));
                     } catch (error) {
                         console.error(`下载图片失败: ${url}`, error);
-                        alert(`第 ${i + 1} 张图片下载失败，继续下载其他图片`);
+                        if (isMobile) {
+                            progressDiv.innerHTML = `
+                                <div style="text-align: center;">
+                                    <p>下载失败，请点击"在新页面打开"后长按保存</p>
+                                    <button onclick="openImagesInNewTabs()" style="margin: 10px 0; background: #2196F3;">
+                                        在新页面打开
+                                    </button>
+                                    <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 5px;">
+                                        关闭提示
+                                    </button>
+                                </div>
+                            `;
+                            return;
+                        }
                     }
                 }
             } finally {
-                document.body.removeChild(progressDiv);
+                if (!isMobile) {
+                    document.body.removeChild(progressDiv);
+                }
             }
+        }
+
+        // 添加在新标签页打开图片的函数
+        function openImagesInNewTabs() {
+            const selectedImages = Array.from(document.querySelectorAll('.image-checkbox:checked'))
+                .map(checkbox => checkbox.dataset.url);
+            
+            selectedImages.forEach((url, index) => {
+                setTimeout(() => {
+                    window.open(url, '_blank');
+                }, index * 300);
+            });
         }
     </script>
     <script src="https://api.cenguigui.cn/api/sjcaidai"></script>
