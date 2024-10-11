@@ -458,56 +458,66 @@
                 return;
             }
 
+            // 检测是否为移动设备
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
             // 创建下载进度提示
             const progressDiv = document.createElement('div');
             progressDiv.className = 'download-progress';
             document.body.appendChild(progressDiv);
 
+            if (isMobile) {
+                // 移动端显示提示并打开新标签页
+                progressDiv.innerHTML = `
+                    <div style="text-align: center;">
+                        <p>正在打开图片，请长按图片选择"保存图片"</p>
+                        <small>已选择 ${selectedImages.length} 张图片</small>
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="margin-top: 10px; padding: 5px 10px; display: block; width: 100%;">
+                            我知道了
+                        </button>
+                    </div>
+                `;
+                
+                // 依次打开图片
+                selectedImages.forEach((url, index) => {
+                    setTimeout(() => {
+                        window.open(url, '_blank');
+                    }, index * 300); // 间隔300ms打开，避免浏览器阻止
+                });
+                
+                return;
+            }
+
+            // PC端下载逻辑保持不变
             try {
                 for (let i = 0; i < selectedImages.length; i++) {
                     const url = selectedImages[i];
                     progressDiv.textContent = `正在下载 ${i + 1}/${selectedImages.length}`;
                     
                     try {
-                        // 获取图片数据
                         const response = await fetch(url);
                         if (!response.ok) throw new Error('下载失败');
                         
                         const blob = await response.blob();
-                        
-                        // 创建下载链接
                         const link = document.createElement('a');
                         link.href = URL.createObjectURL(blob);
-                        link.download = `image_${Date.now()}.jpg`; // 设置下载文件名
+                        link.download = `image_${Date.now()}.jpg`;
                         document.body.appendChild(link);
                         link.click();
                         
-                        // 清理
                         URL.revokeObjectURL(link.href);
                         document.body.removeChild(link);
                         
-                        // 添加小延迟，避免浏览器限制
                         await new Promise(resolve => setTimeout(resolve, 500));
                     } catch (error) {
                         console.error(`下载图片失败: ${url}`, error);
+                        alert(`第 ${i + 1} 张图片下载失败，继续下载其他图片`);
                     }
                 }
             } finally {
-                // 移除进度提示
                 document.body.removeChild(progressDiv);
             }
-        }
-
-        // 添加在新标签页打开图片的函数
-        function openImagesInNewTabs() {
-            const selectedImages = Array.from(document.querySelectorAll('.image-checkbox:checked'))
-                .map(checkbox => checkbox.dataset.url);
-            
-            selectedImages.forEach((url, index) => {
-                setTimeout(() => {
-                    window.open(url, '_blank');
-                }, index * 300);
-            });
         }
     </script>
     <script src="https://api.cenguigui.cn/api/sjcaidai"></script>
