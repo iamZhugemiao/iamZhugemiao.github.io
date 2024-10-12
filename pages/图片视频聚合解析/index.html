@@ -280,6 +280,7 @@
 <body>
     <div class="container">
         <h1>媒体解析工具</h1>
+        <p>工具更新时间：2024年10月12日16:54:51</p>
         
         <div class="input-section">
             <div class="radio-group">
@@ -407,73 +408,46 @@
         async function downloadVideo(url, title) {
             const progressDiv = document.createElement('div');
             progressDiv.className = 'download-progress';
-            progressDiv.textContent = '正在准备下载...';
+            progressDiv.textContent = '正在下载视频...';
             document.body.appendChild(progressDiv);
 
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
             try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('下载失败');
-                
-                const blob = await response.blob();
-                const fileName = `${title.replace(/[<>:"/\\|?*]+/g, '_')}.mp4`;
-                
-                if (isMobile) {
-                    // 移动端使用 Web Share API
-                    if (navigator.share && navigator.canShare) {
-                        try {
-                            const file = new File([blob], fileName, {
-                                type: blob.type
-                            });
-                            
-                            progressDiv.textContent = '请选择保存位置...';
-                            await navigator.share({
-                                files: [file]
-                            });
-                            
-                            progressDiv.innerHTML = '<div style="text-align: center;"><p>✅ 保存成功！</p></div>';
-                        } catch (err) {
-                            // 回退到传统下载
-                            const link = document.createElement('a');
-                            link.href = URL.createObjectURL(blob);
-                            link.download = fileName;
-                            document.body.appendChild(link);
-                            link.click();
-                            URL.revokeObjectURL(link.href);
-                            document.body.removeChild(link);
-                            progressDiv.textContent = '下载已开始...';
-                        }
-                    }
+                if (isMobileDevice()) {
+                    // 移动端：使用原生下载
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${title.replace(/[<>:"/\\|?*]+/g, '_')}.mp4`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
                 } else {
-                    // PC端使用文件选择器
-                    progressDiv.textContent = '请选择保存位置...';
-                    const dirHandle = await selectDownloadDirectory();
-                    
-                    if (dirHandle) {
-                        const saved = await saveFile(dirHandle, fileName, blob);
-                        if (saved) {
-                            progressDiv.innerHTML = '<div style="text-align: center;"><p>✅ 下载完成！</p></div>';
-                        } else {
-                            throw new Error('保存失败');
-                        }
-                    } else {
-                        // 回退到传统下载
-                        const link = document.createElement('a');
-                        link.href = URL.createObjectURL(blob);
-                        link.download = fileName;
-                        document.body.appendChild(link);
-                        link.click();
-                        URL.revokeObjectURL(link.href);
-                        document.body.removeChild(link);
-                        progressDiv.textContent = '下载已开始...';
-                    }
+                    // PC端：使用showSaveFilePicker API
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: `${title.replace(/[<>:"/\\|?*]+/g, '_')}.mp4`,
+                        types: [{
+                            description: 'Video File',
+                            accept: {'video/mp4': ['.mp4']}
+                        }],
+                    });
+                    const writable = await handle.createWritable();
+                    const response = await fetch(url);
+                    await response.body.pipeTo(writable);
                 }
                 
-                setTimeout(() => {
-                    progressDiv.style.opacity = '0';
-                    setTimeout(() => progressDiv.remove(), 300);
-                }, 3000);
+                progressDiv.textContent = '下载完成！';
+                progressDiv.style.cursor = 'pointer';
+                progressDiv.onclick = () => {
+                    if (isMobileDevice()) {
+                        // 打开下载文件夹（Android）
+                        if (/Android/i.test(navigator.userAgent)) {
+                            window.open('content://com.android.externalstorage.documents/root/downloads');
+                        } else {
+                            alert('请在文件管理器中查看下载的文件');
+                        }
+                    } else {
+                        alert('文件已保存到您选择的位置');
+                    }
+                };
             } catch (error) {
                 alert('视频下载失败: ' + error.message);
                 progressDiv.remove();
@@ -505,249 +479,62 @@
             progressDiv.className = 'download-progress';
             document.body.appendChild(progressDiv);
 
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
             try {
-                if (isMobile) {
-                    // 移动端处理逻辑
-                    progressDiv.innerHTML = `
-                        <div style="text-align: center;">
-                            <p>正在准备图片...</p>
-                            <small>请稍候</small>
-                        </div>
-                    `;
-
-                    // 如果是单张图片且支持分享API
-                    if (selectedImages.length === 1 && navigator.share && navigator.canShare) {
-                        try {
-                            const response = await fetch(selectedImages[0]);
-                            const blob = await response.blob();
-                            const file = new File([blob], `image_${Date.now()}.jpg`, {
-                                type: 'image/jpeg'
-                            });
-                            
-                            progressDiv.textContent = '请选择保存位置...';
-                            await navigator.share({
-                                files: [file]
-                            });
-                            
-                            progressDiv.innerHTML = '<div style="text-align: center;"><p>✅ 保存成功！</p></div>';
-                        } catch (err) {
-                            window.open(selectedImages[0], '_blank');
-                        }
-                    } else {
-                        // 多张图片时使用新窗口打开
-                        progressDiv.innerHTML = `
-                            <div style="text-align: center;">
-                                <p>图片已在新窗口打开</p>
-                                <small>请长按图片进行保存</small>
-                                <button onclick="this.parentElement.parentElement.remove()" 
-                                        style="margin-top: 10px; padding: 5px 10px; display: block; width: 100%;">
-                                    我知道了
-                                </button>
-                            </div>
-                        `;
+                if (isMobileDevice()) {
+                    // 移动端：使用 fetch 和 FileSystem API
+                    for (let i = 0; i < selectedImages.length; i++) {
+                        progressDiv.textContent = `正在下载 ${i + 1}/${selectedImages.length}`;
+                        const url = selectedImages[i];
+                        const response = await fetch(url);
+                        const blob = await response.blob();
                         
-                        selectedImages.forEach((url, index) => {
-                            setTimeout(() => {
-                                window.open(url, '_blank');
-                            }, index * 300);
-                        });
+                        // 使用 FileSystem API 保存文件
+                        const filename = `image_${Date.now()}.jpg`;
+                        const root = await navigator.storage.getDirectory();
+                        const fileHandle = await root.getFileHandle(filename, { create: true });
+                        const writable = await fileHandle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
                     }
                 } else {
-                    // PC端处理逻辑
-                    progressDiv.textContent = '请选择保存文件夹...';
-                    const dirHandle = await selectDownloadDirectory();
-                    
-                    if (dirHandle) {
-                        for (let i = 0; i < selectedImages.length; i++) {
-                            const url = selectedImages[i];
-                            progressDiv.textContent = `正在下载第 ${i + 1}/${selectedImages.length} 张图片...`;
-                            
-                            try {
-                                const response = await fetch(url);
-                                if (!response.ok) throw new Error('下载失败');
-                                
-                                const blob = await response.blob();
-                                const fileName = `image_${Date.now()}_${i + 1}.jpg`;
-                                
-                                const saved = await saveFile(dirHandle, fileName, blob);
-                                if (!saved) {
-                                    throw new Error('保存失败');
-                                }
-                                
-                                await new Promise(resolve => setTimeout(resolve, 500));
-                            } catch (error) {
-                                console.error(`下载图片失败: ${url}`, error);
-                                alert(`第 ${i + 1} 张图片下载失败，继续下载其他图片`);
-                            }
-                        }
+                    // PC端：使用 showDirectoryPicker API
+                    const dirHandle = await window.showDirectoryPicker();
+                    for (let i = 0; i < selectedImages.length; i++) {
+                        progressDiv.textContent = `正在下载 ${i + 1}/${selectedImages.length}`;
+                        const url = selectedImages[i];
+                        const response = await fetch(url);
+                        const blob = await response.blob();
                         
-                        progressDiv.innerHTML = `
-                            <div style="text-align: center;">
-                                <p>✅ 全部下载完成！</p>
-                                <small>共 ${selectedImages.length} 张图片</small>
-                            </div>
-                        `;
-                    } else {
-                        // 回退到传统下载方式
-                        for (let i = 0; i < selectedImages.length; i++) {
-                            const url = selectedImages[i];
-                            progressDiv.textContent = `正在下载第 ${i + 1}/${selectedImages.length} 张图片...`;
-                            
-                            try {
-                                const response = await fetch(url);
-                                if (!response.ok) throw new Error('下载失败');
-                                
-                                const blob = await response.blob();
-                                const link = document.createElement('a');
-                                link.href = URL.createObjectURL(blob);
-                                link.download = `image_${Date.now()}_${i + 1}.jpg`;
-                                document.body.appendChild(link);
-                                link.click();
-                                URL.revokeObjectURL(link.href);
-                                document.body.removeChild(link);
-                                
-                                await new Promise(resolve => setTimeout(resolve, 500));
-                            } catch (error) {
-                                console.error(`下载图片失败: ${url}`, error);
-                                alert(`第 ${i + 1} 张图片下载失败，继续下载其他图片`);
-                            }
-                        }
+                        const filename = `image_${Date.now()}.jpg`;
+                        const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+                        const writable = await fileHandle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
                     }
                 }
                 
-                setTimeout(() => {
-                    progressDiv.style.opacity = '0';
-                    setTimeout(() => progressDiv.remove(), 300);
-                }, 3000);
+                progressDiv.textContent = '下载完成！';
+                progressDiv.style.cursor = 'pointer';
+                progressDiv.onclick = () => {
+                    if (isMobileDevice()) {
+                        if (/Android/i.test(navigator.userAgent)) {
+                            window.open('content://com.android.externalstorage.documents/root/downloads');
+                        } else {
+                            alert('请在文件管理器中查看下载的文件');
+                        }
+                    } else {
+                        alert('文件已保存到您选择的文件夹');
+                    }
+                };
             } catch (error) {
-                alert('下载过程中出现错误: ' + error.message);
+                console.error('下载图片失败:', error);
+                alert('下载图片时发生错误');
                 progressDiv.remove();
             }
         }
 
-        function showDownloadComplete(filePath) {
-            const progressDiv = document.createElement('div');
-            progressDiv.className = 'download-progress';
-            progressDiv.style.cursor = 'pointer';
-            progressDiv.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span>✅ 下载完成！</span>
-                    <small style="opacity: 0.8">点击查看</small>
-                </div>
-            `;
-            
-            // 检测是否为移动设备
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            
-            progressDiv.onclick = () => {
-                if (isMobile) {
-                    // 移动端使用系统默认文件管理器
-                    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openDirectory) {
-                        // iOS
-                        window.webkit.messageHandlers.openDirectory.postMessage({path: filePath});
-                    } else if (window.Android && window.Android.openDirectory) {
-                        // Android
-                        window.Android.openDirectory(filePath);
-                    } else {
-                        alert('请在文件管理器中查看下载的文件');
-                    }
-                } else {
-                    // PC端打开文件所在文件夹
-                    if (window.showDirectoryPicker) {
-                        showDirectoryPicker().then(handle => {
-                            // 现代浏览器 File System Access API
-                            handle.getDirectoryHandle('Downloads', { create: false });
-                        }).catch(() => {
-                            // 降级处理：打开默认下载文件夹
-                            window.open('file:///Users/' + (process.env.USER || process.env.USERNAME) + '/Downloads');
-                        });
-                    } else {
-                        // 降级处理：提示用户
-                        alert('请在下载文件夹中查看已下载的文件');
-                    }
-                }
-            };
-
-            document.body.appendChild(progressDiv);
-            
-            // 5秒后自动移除提示
-            setTimeout(() => {
-                progressDiv.style.opacity = '0';
-                setTimeout(() => progressDiv.remove(), 300);
-            }, 5000);
-        }
-
-        async function selectDownloadLocation(fileName, blob) {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            
-            if (isMobile) {
-                // 移动端使用 Web Share API
-                if (navigator.share && navigator.canShare) {
-                    try {
-                        const file = new File([blob], fileName, {
-                            type: blob.type
-                        });
-                        
-                        await navigator.share({
-                            files: [file]
-                        });
-                        return true;
-                    } catch (err) {
-                        console.error('Share failed:', err);
-                        // 如果分享失败，回退到传统下载方式
-                        return false;
-                    }
-                }
-                return false;
-            } else {
-                // PC端使用 File System Access API
-                try {
-                    const handle = await window.showSaveFilePicker({
-                        suggestedName: fileName,
-                        types: [{
-                            description: '文件',
-                            accept: {
-                                'application/octet-stream': ['.jpg', '.jpeg', '.png', '.mp4']
-                            }
-                        }]
-                    });
-                    
-                    const writable = await handle.createWritable();
-                    await writable.write(blob);
-                    await writable.close();
-                    return true;
-                } catch (err) {
-                    console.error('Save failed:', err);
-                    return false;
-                }
-            }
-        }
-
-        async function selectDownloadDirectory() {
-            try {
-                if (window.showDirectoryPicker) {
-                    return await window.showDirectoryPicker();
-                }
-                return null;
-            } catch (err) {
-                console.error('Directory selection failed:', err);
-                return null;
-            }
-        }
-
-        async function saveFile(directoryHandle, fileName, blob) {
-            try {
-                const fileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
-                const writable = await fileHandle.createWritable();
-                await writable.write(blob);
-                await writable.close();
-                return true;
-            } catch (err) {
-                console.error('File save failed:', err);
-                return false;
-            }
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
     </script>
     <script src="https://api.cenguigui.cn/api/sjcaidai"></script>
