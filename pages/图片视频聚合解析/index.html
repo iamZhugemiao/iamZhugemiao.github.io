@@ -295,6 +295,7 @@
             <div class="input-group">
                 <input type="text" id="urlInput" placeholder="请输入链接...">
                 <button onclick="parseMedia()">解析</button>
+                <button onclick="clearInput()">清空</button>
             </div>
         </div>
 
@@ -551,6 +552,10 @@
                     </p>
                 </div>
             `;
+        }
+
+        function clearInput() {
+            document.getElementById('urlInput').value = '';
         }
     </script>
     <script src="https://api.cenguigui.cn/api/sjcaidai"></script>
