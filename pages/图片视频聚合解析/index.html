@@ -408,47 +408,41 @@
         async function downloadVideo(url, title) {
             const progressDiv = document.createElement('div');
             progressDiv.className = 'download-progress';
-            progressDiv.textContent = '正在下载视频...';
+            progressDiv.textContent = '正在准备下载...';
             document.body.appendChild(progressDiv);
 
             try {
-                if (isMobileDevice()) {
-                    // 移动端：使用原生下载
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${title.replace(/[<>:"/\\|?*]+/g, '_')}.mp4`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                } else {
-                    // PC端：使用showSaveFilePicker API
-                    const handle = await window.showSaveFilePicker({
-                        suggestedName: `${title.replace(/[<>:"/\\|?*]+/g, '_')}.mp4`,
-                        types: [{
-                            description: 'Video File',
-                            accept: {'video/mp4': ['.mp4']}
-                        }],
-                    });
-                    const writable = await handle.createWritable();
-                    const response = await fetch(url);
-                    await response.body.pipeTo(writable);
-                }
+                // 使用 fetch 获取视频内容
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('下载失败');
+                
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                
+                // 创建下载链接
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = `${title.replace(/[<>:"/\\|?*]+/g, '_')}.mp4`;
+                document.body.appendChild(a);
+                
+                // 模拟点击下载
+                a.click();
+                
+                // 清理
+                URL.revokeObjectURL(blobUrl);
+                document.body.removeChild(a);
                 
                 progressDiv.textContent = '下载完成！';
                 progressDiv.style.cursor = 'pointer';
                 progressDiv.onclick = () => {
                     if (isMobileDevice()) {
-                        // 打开下载文件夹（Android）
-                        if (/Android/i.test(navigator.userAgent)) {
-                            window.open('content://com.android.externalstorage.documents/root/downloads');
-                        } else {
-                            alert('请在文件管理器中查看下载的文件');
-                        }
+                        alert('请在您的下载文件夹中查看下载的视频');
                     } else {
-                        alert('文件已保存到您选择的位置');
+                        alert('视频已下载到您的默认下载文件夹');
                     }
                 };
             } catch (error) {
+                console.error('视频下载失败:', error);
                 alert('视频下载失败: ' + error.message);
                 progressDiv.remove();
             }
@@ -480,61 +474,67 @@
             document.body.appendChild(progressDiv);
 
             try {
-                if (isMobileDevice()) {
-                    // 移动端：使用 fetch 和 FileSystem API
-                    for (let i = 0; i < selectedImages.length; i++) {
-                        progressDiv.textContent = `正在下载 ${i + 1}/${selectedImages.length}`;
-                        const url = selectedImages[i];
-                        const response = await fetch(url);
-                        const blob = await response.blob();
-                        
-                        // 使用 FileSystem API 保存文件
-                        const filename = `image_${Date.now()}.jpg`;
-                        const root = await navigator.storage.getDirectory();
-                        const fileHandle = await root.getFileHandle(filename, { create: true });
-                        const writable = await fileHandle.createWritable();
-                        await writable.write(blob);
-                        await writable.close();
-                    }
-                } else {
-                    // PC端：使用 showDirectoryPicker API
-                    const dirHandle = await window.showDirectoryPicker();
-                    for (let i = 0; i < selectedImages.length; i++) {
-                        progressDiv.textContent = `正在下载 ${i + 1}/${selectedImages.length}`;
-                        const url = selectedImages[i];
-                        const response = await fetch(url);
-                        const blob = await response.blob();
-                        
-                        const filename = `image_${Date.now()}.jpg`;
-                        const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
-                        const writable = await fileHandle.createWritable();
-                        await writable.write(blob);
-                        await writable.close();
-                    }
+                for (let i = 0; i < selectedImages.length; i++) {
+                    progressDiv.textContent = `正在下载 ${i + 1}/${selectedImages.length}`;
+                    const url = selectedImages[i];
+                    
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`下载第 ${i + 1} 张图片失败`);
+                    
+                    const blob = await response.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = `image_${Date.now()}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    URL.revokeObjectURL(blobUrl);
+                    document.body.removeChild(a);
+                    
+                    // 添加小延迟，避免浏览器阻止多次下载
+                    await new Promise(resolve => setTimeout(resolve, 500));
                 }
                 
                 progressDiv.textContent = '下载完成！';
                 progressDiv.style.cursor = 'pointer';
                 progressDiv.onclick = () => {
                     if (isMobileDevice()) {
-                        if (/Android/i.test(navigator.userAgent)) {
-                            window.open('content://com.android.externalstorage.documents/root/downloads');
-                        } else {
-                            alert('请在文件管理器中查看下载的文件');
-                        }
+                        alert('请在您的下载文件夹中查看下载的图片');
                     } else {
-                        alert('文件已保存到您选择的文件夹');
+                        alert('图片已下载到您的默认下载文件夹');
                     }
                 };
             } catch (error) {
                 console.error('下载图片失败:', error);
-                alert('下载图片时发生错误');
+                alert('下载图片时发生错误: ' + error.message);
                 progressDiv.remove();
             }
         }
 
         function isMobileDevice() {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        function displayVideo(data) {
+            const resultSection = document.getElementById('resultSection');
+            resultSection.innerHTML = `
+                <div class="video-result">
+                    <h2>${data.title}</h2>
+                    <p>作者：${data.author}</p>
+                    <p>时长/发布时间：${data.time}</p>
+                    <img src="${data.cover}" 
+                        crossorigin="anonymous" 
+                        referrerpolicy="no-referrer"
+                        alt="封面" 
+                        style="max-width: 300px" 
+                        onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'169\\'%3E%3Crect width=\\'300\\' height=\\'169\\' fill=\\'%23ddd\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23666\\' font-size=\\'16\\'%3E封面加载失败%3C/text%3E%3C/svg%3E'">
+                    <p>
+                        <button onclick="downloadVideo('${data.url}', '${data.title}')">下载视频</button>
+                    </p>
+                </div>
+            `;
         }
     </script>
     <script src="https://api.cenguigui.cn/api/sjcaidai"></script>
