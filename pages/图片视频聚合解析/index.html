@@ -386,50 +386,67 @@
 
         function displayVideo(data) {
             const resultSection = document.getElementById('resultSection');
+            const title = data.title || '未知标题';
+            const author = data.author || '未知作者';
+            const time = data.time || '';
+            const cover = data.cover || '';
+            const url = data.url || '';
+
             resultSection.innerHTML = `
                 <div class="video-result">
-                    <h2>${data.title}</h2>
-                    <p>作者：${data.author}</p>
-                    <p>时长/发布时间：${data.time}</p>
-                    <img src="${data.cover}" 
-                         crossorigin="anonymous" 
-                         referrerpolicy="no-referrer"
-                         alt="封面" 
-                         style="max-width: 300px" 
-                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'169\\'%3E%3Crect width=\\'300\\' height=\\'169\\' fill=\\'%23ddd\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23666\\' font-size=\\'16\\'%3E封面加载失败%3C/text%3E%3C/svg%3E'">
+                    <h2>${title}</h2>
+                    <p>作者：${author}</p>
+                    <p>时长/发布时间：${time}</p>
+                    <img src="${cover}" 
+                        crossorigin="anonymous" 
+                        referrerpolicy="no-referrer"
+                        alt="封面" 
+                        style="max-width: 300px" 
+                        onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'300\\' height=\\'169\\'%3E%3Crect width=\\'300\\' height=\\'169\\' fill=\\'%23ddd\\'/%3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23666\\' font-size=\\'16\\'%3E封面加载失败%3C/text%3E%3C/svg%3E'">
                     <p>
-                        <a href="${data.url}" target="_blank">
-                            <button onclick="downloadVideo('${data.url}', '${data.title}')">下载视频</button>
-                        </a>
+                        <button onclick="downloadVideo('${url}', '${title}')">下载视频</button>
                     </p>
                 </div>
             `;
         }
 
         async function downloadVideo(url, title) {
+            if (!url) {
+                alert('视频链接无效，无法下载。');
+                return;
+            }
+
             const progressDiv = document.createElement('div');
             progressDiv.className = 'download-progress';
             progressDiv.textContent = '正在准备下载...';
             document.body.appendChild(progressDiv);
 
             try {
-                // 使用 fetch 获取视频内容
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('下载失败');
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Referer': window.location.href,
+                        'User-Agent': navigator.userAgent
+                    }
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("video/")) {
+                    throw new Error('返回的内容不是视频文件');
+                }
+
                 const blob = await response.blob();
                 const blobUrl = URL.createObjectURL(blob);
                 
-                // 创建下载链接
                 const a = document.createElement('a');
                 a.href = blobUrl;
                 a.download = `${title.replace(/[<>:"/\\|?*]+/g, '_')}.mp4`;
                 document.body.appendChild(a);
                 
-                // 模拟点击下载
                 a.click();
                 
-                // 清理
                 URL.revokeObjectURL(blobUrl);
                 document.body.removeChild(a);
                 
@@ -445,7 +462,8 @@
             } catch (error) {
                 console.error('视频下载失败:', error);
                 alert('视频下载失败: ' + error.message);
-                progressDiv.remove();
+            } finally {
+                setTimeout(() => progressDiv.remove(), 5000);
             }
         }
 
